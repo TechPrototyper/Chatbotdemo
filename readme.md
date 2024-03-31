@@ -18,7 +18,7 @@ Das Zusammenwirken der Komponenten ist in nachfolgenden UML Sequenzdiagramm doku
 
 
 
-- **UML-Sequenzdiagramm**: Veranschaulicht die Interaktionen zwischen den Komponenten des Chatbots.
+**UML-Sequenzdiagramm**: Veranschaulicht die Interaktionen zwischen den Komponenten des Chatbots.
 
 ### Zusätzliche Infrastruktur
 
@@ -26,4 +26,4 @@ Vor den Middletier bzw. die Web API wurde ein API Gateway (Azure API Management)
 
 
 
-- **Azure API Management Screenshots**: Zeigen die eingebettete Chatbot Middle Tier API und einen Blick auf die modifizierte OpenAPI Datei.
+**Azure API Management Screenshots**: Zeigen die eingebettete Chatbot Middle Tier API und einen Blick auf die modifizierte OpenAPI Datei.
