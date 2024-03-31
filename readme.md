@@ -37,3 +37,14 @@ Vor den Middletier bzw. die Web API wurde ein API Gateway (Azure API Management)
 
 
 **Azure API Management Screenshots**: Zeigen die eingebettete Chatbot Middle Tier API und einen Blick auf die modifizierte OpenAPI Datei.
+
+
+### Genutzte Technologien der Azure Plattform, und auf der Azure Plattform:
+
+1. Azure Static Web App, HTML, JavaScript, React, Material UI Components (MUI), mit CI/CD via Github
+2. Azure Function App mit Python 3.10, mit CI/CD via Github
+3. Azure Storage Account, Azure Table Storage
+4. Azure API Management, mit modifizierter OpenAPI-Spezifikation
+5. (Azure OpenAI Resource)
+6. (Azure- ) OpenAI Assistant API
+7. Azure Application Registration (für CI/CD mit Github Action Scripts)
