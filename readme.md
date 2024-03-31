@@ -15,15 +15,17 @@ Der Chatbot setzt sich aus drei Hauptkomponenten sowie dem Browser zusammen. Im 
 
 Das Zusammenwirken der Komponenten ist in nachfolgenden UML Sequenzdiagramm dokumentiert:
 
+![318154719-3f7b1530-9e21-4712-941c-7291b6d3ee60-2](https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/24cb80fc-4301-40d0-aee2-a0af598da52a)
 
-
-
-**UML-Sequenzdiagramm**: Veranschaulicht die Interaktionen zwischen den Komponenten des Chatbots.
+**UML-Sequenzdiagramm**: Veranschaulicht die Interaktionen zwischen den Komponenten des Demo-Chatbots.
 
 ### Zusätzliche Infrastruktur
 
 Vor den Middletier bzw. die Web API wurde ein API Gateway (Azure API Management) geschaltet, um den Zugriff zu steuern und einzuschränken. Hierbei wurde die OpenAPI-Spezifikation manuell so angepasst, dass die API vollständig beschrieben wurde, inkl. aller nötigen Parameter. Zwar sind Azure Function Apps und API Management integriert, und der Endpunkt der Function App kann automatisch ins APIM übernommen werden. Leider sind allerdings z.B. die Query Parameter nicht automatisch in den Metadaten enthalten, wie man dies z.B. von FastAPI kennt. Daher wurde das OpenAPI File, in Azure API Management *Frontend* genannt (hat nichts mit unserem Chatbot Fronend zu tun), entsprechend angepasst und vervollständigt.
 
+<img width="1609" alt="318154925-24350a91-d626-40b0-aefd-2eb66c3397b0-2" src="https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/228c139e-7a8f-4dc9-b453-a1f963b27ac6">
+
+<img width="1610" alt="318154906-83dedc77-5b3f-433c-9ecd-ad0c3d830758-2" src="https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/b380dc5e-94fc-4152-8e6f-2edc70c9f88b">
 
 
 **Azure API Management Screenshots**: Zeigen die eingebettete Chatbot Middle Tier API und einen Blick auf die modifizierte OpenAPI Datei.
