@@ -1,9 +1,17 @@
 
 # Beschreibung des Chatbot-Repositories
 
-## Überblick
+## Anleitung zur Benutzung
 
-Der Chatbot setzt sich aus drei Hauptkomponenten sowie dem Browser zusammen. Im Folgenden werden die einzelnen Komponenten und deren Zusammenwirken beschrieben.
+Der Bot ist unter der URL 
+
+https://lively-forest-0dbc9bf03.5.azurestaticapps.net
+
+veröffentlicht und kann ausprobiert werden. Die E-Mail Adresse, die angegeben wird, und auch fiktiv sein kann, wird als Schlüssel verwendet, um den Dialog zu persistieren bzw. später wieder aufzurufen. Man kann also den Dialog beenden und zu einem späteren Zeitpunkt wieder fortsetzen.
+
+## Überblick über die Komponenten
+
+Der Demo Chatbot setzt sich aus drei Hauptkomponenten sowie dem Browser zusammen. Im Folgenden werden die einzelnen Komponenten und deren Zusammenwirken beschrieben.
 
 ### Komponenten
 
