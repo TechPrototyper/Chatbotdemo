@@ -47,21 +47,23 @@ class ChatRequestParams:
         self.user_name = request.params.get("Name", "")
         self.user_email = request.params.get("email", "")
         self.user_prompt = request.params.get("prompt", "")
+        if not self.user_name or not self.user_email or not self.user_prompt:
+          logging.error("Fehlende Parameter: Name, E-Mail oder Prompt")
+          raise Exception("One or more parameters missing")
+
+
 
 @app.route(route="mock", methods=["GET", "POST"])
 def mock(req: func.HttpRequest) -> func.HttpResponse:
     """
     Einfacher Mock-Endpoint zum Testen der Verbindung und Parametereingabe.
     """
+    try: 
+      params = ChatRequestParams(req)
+    except:
+        return func.HttpResponse(f"An error has occured: {e}", status_code=400)
 
-    params = ChatRequestParams(req)
-
-    if not params.user_name or not params.user_email or not params.user_prompt:
-        logging.error("Fehlende Parameter: Name, E-Mail oder Prompt")
-        return func.HttpResponse("Missing Parameters, please provide user's first name, user's email and a prompt", status_code=400)
-
-    time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-               
+    time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")               
     return func.HttpResponse(f"Hello, {params.user_name}! So you like to talk about {params.user_prompt}", status_code=200)
 
 # Hauptendpunkt für den Chat
@@ -71,12 +73,10 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     Haupt-Chat-Endpoint, verbindet sich mit einem Backend-Service zur Verarbeitung der Anfragen.
     """
     # Parameter aus der Anfrage extrahieren.
-    params = ChatRequestParams(req)
-
-    # Überprüfen, ob alle erforderlichen Parameter vorhanden sind.
-    if not params.user_name or not params.user_email or not params.user_prompt:
-        logging.error("Fehlende Parameter: Name, E-Mail oder Prompt")
-        return func.HttpResponse("Missing Parameters, please provide user's first name, user's email and a prompt", status_code=400)
+    try:
+      params = ChatRequestParams(req)
+    except:
+      return func.HttpResponse(f"An error has occured: {e}", status_code=400)
 
     # Timestamp für Prompt erstellen
     time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
