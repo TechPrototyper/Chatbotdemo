@@ -1,5 +1,5 @@
 
-# Beschreibung des Chatbot-Repositories
+# Repo Chatbotdemo - Kurzdoku
 
 ## Anleitung zur Benutzung
 
