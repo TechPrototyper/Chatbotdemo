@@ -51,8 +51,6 @@ class ChatRequestParams:
           logging.error("Fehlende Parameter: Name, E-Mail oder Prompt")
           raise Exception("One or more parameters missing")
 
-
-
 @app.route(route="mock", methods=["GET", "POST"])
 def mock(req: func.HttpRequest) -> func.HttpResponse:
     """
@@ -60,8 +58,8 @@ def mock(req: func.HttpRequest) -> func.HttpResponse:
     """
     try: 
       params = ChatRequestParams(req)
-    except:
-        return func.HttpResponse(f"An error has occured: {e}", status_code=400)
+    except Exception as e:
+      return func.HttpResponse(f"An error has occured: {e}", status_code=400)
 
     time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")               
     return func.HttpResponse(f"Hello, {params.user_name}! So you like to talk about {params.user_prompt}", status_code=200)
@@ -75,7 +73,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     # Parameter aus der Anfrage extrahieren.
     try:
       params = ChatRequestParams(req)
-    except:
+    except Exception as e:
       return func.HttpResponse(f"An error has occured: {e}", status_code=400)
 
     # Timestamp für Prompt erstellen
@@ -110,6 +108,5 @@ def alive(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Alive function processed a request.')
     #TODO: Implementierung der Status-Logik
     return func.HttpResponse('{"chat_service": {"openai": "good", "database": "good"}}', status_code=200, mimetype="application/json")
-
 
 
