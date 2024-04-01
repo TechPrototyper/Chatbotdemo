@@ -38,6 +38,29 @@ Vor den Middletier bzw. die Web API wurde ein API Gateway (Azure API Management)
 
 **Azure API Management Screenshots**: Zeigen die eingebettete Chatbot Middle Tier API und einen Blick auf die modifizierte OpenAPI Datei.
 
+### Runtime und Repo-Variablen
+
+Um dieses Beispiel in einer anderen Umgebung zum Laufen zu bringen, muss in Microsoft Azure eine Function App für eine Python 3.10 App angelegt werden. Der Name muss später, siehe unten, in einer Variablen hinterlegt werden. Eine Function App erzeugt außerdem ein sog. Publishing Profile, über das Deployments gesteuert werden. Man kann das Publishing Profile herunterladen und einbetten, siehe ebenfalls unten, und in einem Secret speichern, siehe unten. Wir benötigen außerdem für den Fall, dass CI/CD eingerichtet werden soll, eine Application Registration; diese erzeugt eine ClientId, ein ClientSecret und stellt z.B. bei Generierung durch die Kommandozeile eine JSON-Datei bereit, die wir als Secret AZURE_CREDENTIALS hinterlegen, siehe unten.
+
+Für das Frontend müssen wir eine Azure Static Web App anlegen. Diese kann man direkt mit einem Github Repo verbinden, und CI/CD wird automatisch eingerichtet. Aber Vorsicht, es sind in der automatisch erzeugten Datei einige Änderungen zu machen; bitte dazu einfach hier im Branch Frontend die Datei vergleichen.
+
+Das Einrichten der Secrets und Variablen erfolgt unter
+
+Settings...Secrets & Variables...Actions
+
+folgende Einstellungen gemacht werden:
+
+Secrets:
+
+AZURE_APP_PUBLISH_PROFILE                  Das sog. Publishing Profile der Azure Function App
+AZURE_CREDENTIALS                          Eine JSON-Datei, die ClientId, ClientSecret, SubscriptionId und TenantId enthält.
+
+Ein weiteres Secret wird automatisch angelegt, wenn man die Azure Static Web App anlegt.
+
+Variables:
+
+AZURE_FUNCTIONAPP_NAME                    Der Name der Function App, in die die API deployed wird
+AZURE_FUNCTIONAPP_PACKAGE_PATH            Die Stelle im Repo, in der der Quellcode für die API enthalten ist.
 
 ### Genutzte Technologien der Azure Plattform, und auf der Azure Plattform:
 
