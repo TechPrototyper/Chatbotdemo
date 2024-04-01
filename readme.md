@@ -3,11 +3,7 @@
 
 ## Anleitung zur Benutzung
 
-Der Bot ist unter der URL 
-
-https://lively-forest-0dbc9bf03.5.azurestaticapps.net
-
-veröffentlicht und kann ausprobiert werden. Die E-Mail Adresse, die angegeben wird, und auch fiktiv sein kann, wird als Schlüssel verwendet, um den Dialog zu persistieren bzw. später wieder aufzurufen. Man kann also den Dialog beenden und zu einem späteren Zeitpunkt wieder fortsetzen.
+Die bekannte Bot-URL aufrufen. Dann soll ein Name und eine E-Mail Adresse angegeben werden. Die E-Mail Adresse, die angegeben wird, und auch fiktiv sein kann, wird als Schlüssel verwendet, um den Dialog zu persistieren bzw. später wieder aufzurufen. Man kann also den Dialog beenden und zu einem späteren Zeitpunkt wieder fortsetzen.
 
 ## Überblick über die Komponenten
 
