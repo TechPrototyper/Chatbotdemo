@@ -59,7 +59,8 @@ function Chatbot() {
         setChatEnded(true);
         setMessages((prevMessages) => [
           ...prevMessages,
-          { text: data + "\n\nChat beendet. Du kannst jederzeit zurückkommen.", sender: 'bot', isEndMessage: true }
+          { text: data, sender: 'bot' },
+          { text: "\n\nChat beendet. Du kannst jederzeit zurückkommen.", sender: 'bot', isEndMessage: true }
         ]);
       } else {
         setMessages((prevMessages) => [...prevMessages, { text: data, sender: 'bot' }]);
@@ -129,6 +130,7 @@ function Chatbot() {
                   borderRadius: '10px',
                   maxWidth: '70%',
                   wordWrap: 'break-word',
+                  fontStyle: msg.isEndMessage ? 'italic' : 'normal'
                 }}
               >
                 {msg.text}
@@ -144,18 +146,19 @@ function Chatbot() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Nachricht eingeben..."
+            placeholder={chatEnded ? "" : "Nachricht eingeben..."} // Entferne den Platzhalter, wenn der Chat beendet ist
             multiline
             minRows={1}
             maxRows={5}
             sx={{ borderRadius: '20px' }}
-            disabled={chatEnded}
+            disabled={chatEnded} //Eingabefeld deaktivieren, wenn Chat beendet
+            autoFocus={!chatEnded}
           />
           <Button type="submit" disabled={chatEnded} sx={{ ml: 1, borderRadius: '20px' }}>Senden</Button>
         </Box>
       </Box>
       <Typography sx={{ mt: 4, textAlign: 'center', color: 'gray' }}>
-        <Link href="https://github.com/TechPrototyper/chatbot-mui" target="_blank" rel="noopener noreferrer" sx={{ textDecoration: 'none', color: 'gray' }}>
+        <Link href="https://github.com/TechPrototyper/Chatbotdemo" target="_blank" rel="noopener noreferrer" sx={{ textDecoration: 'none', color: 'gray' }}>
           Arbeitsprobe, Bewerbung von Tim Walter bei GULP und den Hamburger Energiewerken.
         </Link>
       </Typography>
