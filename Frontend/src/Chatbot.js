@@ -159,7 +159,7 @@ function Chatbot() {
       </Box>
       <Typography sx={{ mt: 4, textAlign: 'center', color: 'gray' }}>
         <Link href="https://github.com/TechPrototyper/Chatbotdemo" target="_blank" rel="noopener noreferrer" sx={{ textDecoration: 'none', color: 'gray' }}>
-          Arbeitsprobe, Bewerbung von Tim Walter bei GULP und den Hamburger Energiewerken.
+          Arbeitsprobe, Bewerbung von Tim Walter für ein Projekt bei GULP.
         </Link>
       </Typography>
     </>
