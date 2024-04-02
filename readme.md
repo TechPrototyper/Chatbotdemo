@@ -36,7 +36,13 @@ Vor den Middletier bzw. die Web API wurde ein API Gateway (Azure API Management)
 
 ### Runtime und Repo-Variablen
 
-Um dieses Beispiel in einer anderen Umgebung zum Laufen zu bringen, muss in Microsoft Azure eine Function App für eine Python 3.10 App angelegt werden. Der Name muss später, siehe unten, in einer Variablen hinterlegt werden. Eine Function App erzeugt außerdem ein sog. Publishing Profile, über das Deployments gesteuert werden. Man kann das Publishing Profile herunterladen und einbetten, siehe ebenfalls unten, und in einem Secret speichern, siehe unten. Wir benötigen außerdem für den Fall, dass CI/CD eingerichtet werden soll, eine Application Registration; diese erzeugt eine ClientId, ein ClientSecret und stellt z.B. bei Generierung durch die Kommandozeile eine JSON-Datei bereit, die wir als Secret AZURE_CREDENTIALS hinterlegen, siehe unten.
+Um dieses Beispiel in einer anderen Umgebung zum Laufen zu bringen, muss in Microsoft Azure eine Function App für eine Python 3.10 App angelegt werden. Der Name der Function App muss später, siehe unten, in einer Variablen hinterlegt werden. Eine Function App erzeugt außerdem ein sog. Publishing Profile, über das Deployments gesteuert werden. Man kann das Publishing Profile herunterladen und einbetten, siehe ebenfalls unten, und in einem Secret speichern, siehe unten. Wir benötigen außerdem für den Fall, dass CI/CD eingerichtet werden soll, eine Application Registration; diese erzeugt eine ClientId, ein ClientSecret und stellt z.B. bei Generierung durch die Kommandozeile eine JSON-Datei bereit, die wir als Secret AZURE_CREDENTIALS hinterlegen, siehe unten.
+
+Die Function App muss außerdem konfiguriert werden, und zwar so, dass alle wichtigen Informationen vorliegen. Für diese Demo wurde auf den Einsatz eines Key Vaults verzichtet, alle nötigen Parameter, sowohl für das Azure OpenAI Backend, als auch für das von OpenAI, wurden in der Function App Configuration Section eingerichtet:
+
+<img width="1184" alt="Screenshot 2024-04-02 at 05 06 48" src="https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/fd4bc942-3563-4758-949a-cb30f361f258">
+
+**Azure Function App Configuration Screenshot:** Alle wichtigen Parameter wie Api-Keys, Connection Strings etc. müssen in der App Configuration hinterlegt werden.
 
 Für das Frontend müssen wir eine Azure Static Web App anlegen. Diese kann man direkt mit einem Github Repo verbinden, und CI/CD wird automatisch eingerichtet. Aber Vorsicht, es sind in der automatisch erzeugten Datei einige Änderungen zu machen; bitte dazu einfach hier im Branch Frontend die Datei vergleichen.
 
