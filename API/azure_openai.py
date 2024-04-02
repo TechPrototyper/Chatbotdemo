@@ -6,7 +6,7 @@ Beschreibung: Stellt die Kommunikation zwischen der Funktion App und der Azure O
               "Schwesterdatei" ist o_openai.py, die auf allgemeine OpenAI-Endpunkte zugreift.
 
 Autor: Tim Walter (TechPrototyper)
-Datum: 2024-03-28
+Datum: 2024-04-02
 Version: 1.0.0
 Quellen: [OpenAI API Dokumentation], [Azure Functions Dokumentation], [Azure Table Storage Dokumentation]
 Kontakt: projekte@tim-walter.net
@@ -22,7 +22,7 @@ import logging
 # Konfiguration des Loggings
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class InteractWithAzureOpenAI:
+class InteractWithOpenAI:
     """
     Diese Klasse handhabt die Kommunikation mit der Azure OpenAI API.
     """
@@ -73,8 +73,9 @@ class InteractWithAzureOpenAI:
             thread_id = self.threads.get_id(user_email)
         except LookupError:
             try:
-                thread = self.client.threads.create()  # Angenommen, dies ist die korrekte Methode
-                thread_id = thread['id']  # Annahme über die Struktur der Antwort
+                thread = self.client.beta.threads.create()  # Angenommen, dies ist die korrekte Methode
+                print(thread)
+                thread_id = thread.id  # Annahme über die Struktur der Antwort
                 self.threads.set_id(user_email, thread_id)
             except Exception as e:
                 logging.error(f"Fehler bei der Thread-Erstellung oder -Speicherung: {e}")
@@ -93,25 +94,25 @@ class InteractWithAzureOpenAI:
             thread_id = self.get_or_create_thread(user_email)
             logging.info(f"Thread ID: {thread_id}")
 
-            self.client.threads.messages.create(
+            self.client.beta.threads.messages.create(
                 thread_id=thread_id,
                 role="user",
                 content=prompt
             )
 
-            run = self.client.threads.runs.create(
+            run = self.client.beta.threads.runs.create(
                 thread_id=thread_id,
                 assistant_id=self.main_assistant_id
             )
 
             while True:
-                updated_run = self.client.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+                updated_run = self.client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
                 if updated_run.status in ["completed", "failed", "cancelled", "expired"]:
                     break
                 time.sleep(1)
 
             if updated_run.status == "completed":
-                messages = self.client.threads.messages.list(thread_id=thread_id)
+                messages = self.client.beta.threads.messages.list(thread_id=thread_id)
                 if messages.data and len(messages.data) > 0 and messages.data[0].content:
                     return 200, messages.data[0].content[0].text.value
                 else:

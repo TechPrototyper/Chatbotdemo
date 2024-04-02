@@ -13,7 +13,7 @@ Kontakt: projekte@tim-walter.net
 import azure.functions as func
 import logging
 from datetime import datetime
-from o_openai import InteractWithOpenAI
+from azure_openai import InteractWithOpenAI
 
 
 
@@ -108,5 +108,6 @@ def alive(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Alive function processed a request.')
     #TODO: Implementierung der Status-Logik
     return func.HttpResponse('{"chat_service": {"openai": "good", "database": "good"}}', status_code=200, mimetype="application/json")
+
 
 
