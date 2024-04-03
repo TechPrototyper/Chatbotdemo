@@ -47,12 +47,11 @@ class EventGridPublisher:
         # if i am getting here with an exception..
         if exc_type:
             logging.error(f"Error: {exc_type}: {exc_val}")
-            self.close()
-            return False
-        else:
+        else: # No Exception
             logging.info("EventGridPublisherClient closed.")
-            self.close()
-            return False
+            
+        self.close()
+        return False
 
 # I need this logic to be implemented here in the __exit__ method:
 
