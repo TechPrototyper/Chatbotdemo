@@ -34,13 +34,18 @@ Vor den Middletier bzw. die Web API wurde ein API Gateway (Azure API Management)
 
 **Azure API Management Screenshots**: Zeigen die eingebettete Chatbot Middle Tier API und einen Blick auf die modifizierte OpenAPI Datei.
 
+### Events: New User Registered Event im Azure Event Grid
+
+Der Chatbot enthält serverseitig ein Eventgrid-Topic, auf dem zur Zeit für den Fall eines Erstlogins ein Ereignis ausgelöst wird. Mit Hilfe einer Eventgrid Subscription kann dann auf dieses Ereignis reagiert werden. Es ist sind weitere Events geplant, aber die Infrastruktur steht. Es muss dazu natürlich ein Eventgrid-Topic angelegt werden, und zwei weitere Environment-Parameter gesetzt werden, damit die Chat API Events veröffentlichen kann. Zur Behandlung wurde eine Familie von Klassen erstellt, die die Nachrichten nach dem Cloud Event Schenma 1.0 generieren, *my_cloudevents.py*, und ein Modul, welches diese Event-Messages an das Event-Grid übermittelt, *event_grid_publisher.py*.
+
+
 ### Runtime und Repo-Variablen
 
 Um dieses Beispiel in einer anderen Umgebung zum Laufen zu bringen, muss in Microsoft Azure eine Function App für eine Python 3.10 App angelegt werden. Der Name der Function App muss später, siehe unten, in einer Variablen hinterlegt werden. Eine Function App erzeugt außerdem ein sog. Publishing Profile, über das Deployments gesteuert werden. Man kann das Publishing Profile herunterladen und einbetten, siehe ebenfalls unten, und in einem Secret speichern, siehe unten. Wir benötigen außerdem für den Fall, dass CI/CD eingerichtet werden soll, eine Application Registration; diese erzeugt eine ClientId, ein ClientSecret und stellt z.B. bei Generierung durch die Kommandozeile eine JSON-Datei bereit, die wir als Secret AZURE_CREDENTIALS hinterlegen, siehe unten.
 
-Die Function App muss außerdem konfiguriert werden, und zwar so, dass alle wichtigen Informationen vorliegen. Für diese Demo wurde auf den Einsatz eines Key Vaults verzichtet, alle nötigen Parameter, sowohl für das Azure OpenAI Backend, als auch für das von OpenAI, wurden in der Function App Configuration Section eingerichtet:
+Die Function App muss außerdem konfiguriert werden, und zwar so, dass alle wichtigen Informationen vorliegen. Für diese Demo wurde auf den Einsatz eines Key Vaults verzichtet, alle nötigen Parameter, sowohl für das Azure OpenAI Backend, als auch für das von OpenAI, wurden in der Function App Configuration Section eingerichtet. Hier nicht im Bild sind noch die 
 
-<img width="1184" alt="Screenshot 2024-04-02 at 05 06 48" src="https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/fd4bc942-3563-4758-949a-cb30f361f258">
+![Screenshot 2024-04-03 at 18 47 38](https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/51ec448a-f178-4ae9-9f3f-287774e3c9b0)
 
 **Azure Function App Configuration Screenshot:** Alle wichtigen Parameter wie Api-Keys, Connection Strings etc. müssen in der App Configuration hinterlegt werden.
 
@@ -73,3 +78,4 @@ AZURE_FUNCTIONAPP_PACKAGE_PATH            Die Stelle im Repo, in der der Quellco
 5. Azure OpenAI Resource (France Central)
 6. Azure OpenAI Assistant API
 7. Azure Application Registration (für CI/CD mit Github Action Scripts)
+8. Azure Event Grid
