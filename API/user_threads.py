@@ -2,12 +2,17 @@
 Titel: user_threads.py
 
 Beschreibung:   Implementiert die Verwaltung der Zuordnung zwischen Benutzern und ihren Threads in Azure Table Storage.
+                Siehe Bemerkung Todo unten.
 
 Autor: Tim Walter (TechPrototyper)
 Datum: 2024-03-28
 Version: 1.0.0
 Quellen: [Azure Table Storage Dokumentation]
 Kontakt: projekte@tim-walter.net
+
+Todo: Umbenennung der Klasse in Users, da jetzt neben der User-Thread-Zuordnung auch weitere Benutzerdaten
+      gespeichert werden.
+
 """
 
 import os
@@ -47,7 +52,7 @@ class UserThreads:
             user = self.table_client.get_entity(partition_key="Chat", row_key=user_id)
             return user["ThreadId"]
         except Exception as e:
-            logging.error(f"Thread für Benutzer {user_id} nicht gefunden.")
+            logging.info(f"Thread für Benutzer {user_id} nicht gefunden.")
             raise LookupError("ThreadNotFound") from e
 
     def set_id(self, user_id: str, thread_id: str) -> bool:
@@ -62,7 +67,8 @@ class UserThreads:
             user = {
                 "PartitionKey": "Chat",
                 "RowKey": user_id,
-                "ThreadId": thread_id
+                "ThreadId": thread_id,
+                "ExtendedEvents": "0"
             }
             self.table_client.upsert_entity(entity=user)
             logging.info(f"Thread-ID {thread_id} für Benutzer {user_id} gesetzt.")
@@ -70,7 +76,71 @@ class UserThreads:
         except Exception as e:
             logging.error(f"Fehler beim Speichern der Thread-ID für Benutzer {user_id}.")
             raise IOError("ThreadPersistenceFailed") from e
+        
+    def get_extended_events(self, user_id: str) -> bool:
+        """
+        Ruft die Schalterstellung für erweiterte Events für einen gegebenen Benutzer ab.
+        
+        :param user_id: Die ID des Benutzers.
+        :return: Schalterstellung; 0 für ausgeschaltet, 1 für eingeschaltet.
+        """
+        try:
+            user = self.table_client.get_entity(partition_key="Chat", row_key=user_id)
+            return bool(int(user["ExtendedEvents"])) # Schalter ist 0 oder 1, aber hier als bool zurückgegeben
+        except Exception as e:
+            logging.info(f"Erweiterte Events für Benutzer {user_id} nicht gefunden.")
+            raise LookupError("ExtendedEventsNotFound") from e
+        
+    def set_extended_events(self, user_id: str, extended_events: bool) -> bool:
+        """
+        Speichert oder aktualisiert die Schalterstellung für erweiterte Events für einen Benutzer.
+        
+        :param user_id: Die ID des Benutzers.
+        :param extended_events: Die zu speichernde Schalterstellung; True für eingeschaltet, False für ausgeschaltet.
+        :return: True, wenn die Operation erfolgreich war, sonst False.
+        """
+        try:
+            user = self.table_client.get_entity(partition_key="Chat", row_key=user_id)
+            user["ExtendedEvents"] = "1" if extended_events else "0"
+            self.table_client.upsert_entity(entity=user)
+            logging.info(f"Erweiterte Events für Benutzer {user_id} auf {int(extended_events)} gesetzt.")
+            return True
+        except Exception as e:
+            logging.error(f"Fehler beim Speichern der erweiterten Events für Benutzer {user_id}.")
+            raise IOError("ExtendedEventsPersistenceFailed") from e
     
+    def get_user_data(self, user_id: str) -> dict:
+        """
+        Ruft die Benutzerdaten für einen gegebenen Benutzer ab.
+        
+        :param user_id: Die ID des Benutzers.
+        :return: Die Benutzerdaten als Dictionary.
+        """
+        try:
+            user = self.table_client.get_entity(partition_key="Chat", row_key=user_id)
+            return user
+        except Exception as e:
+            logging.info(f"Benutzerdaten für Benutzer {user_id} nicht gefunden.")
+            raise LookupError("UserDataNotFound") from e
+        
+    def set_user_data(self, user_id: str, user_data: dict) -> bool:
+        """
+        Speichert oder aktualisiert die Benutzerdaten für einen Benutzer.
+        
+        :param user_id: Die ID des Benutzers.
+        :param user_data: Die zu speichernden Benutzerdaten.
+        :return: True, wenn die Operation erfolgreich war, sonst False.
+        """
+        try:
+            user_data["PartitionKey"] = "Chat"
+            user_data["RowKey"] = user_id
+            self.table_client.upsert_entity(entity=user_data)
+            logging.info(f"Benutzerdaten für Benutzer {user_id} gesetzt.")
+            return True
+        except Exception as e:
+            logging.error(f"Fehler beim Speichern der Benutzerdaten für Benutzer {user_id}.")
+            raise IOError("UserDataPersistenceFailed") from e
+
     def close(self):
         """
         Schließt die Verbindung zum Azure Table Service.

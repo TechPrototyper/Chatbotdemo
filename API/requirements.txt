@@ -5,3 +5,6 @@
 azure-functions
 openai
 azure-data-tables
+azure-eventgrid
+cloudevents
+

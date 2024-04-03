@@ -41,7 +41,7 @@ class InteractWithOpenAI:
             raise EnvironmentError("AZURE_OPENAI_API_KEY oder AZURE_OPENAI_ENDPOINT Umgebungsvariable ist nicht gesetzt.")
         
         try:
-            self.client = AzureOpenAI(api_key=api_key, api_version="2024-02-15-preview", azure_endpoint=endpoint)
+            self.client = AzureOpenAI(api_key=api_key, api_version=api_version, azure_endpoint=endpoint)
         except Exception as e:
             logging.error(f"Konnte keine Verbindung zur Azure OpenAI API herstellen: {e}")
             raise
