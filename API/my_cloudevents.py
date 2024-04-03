@@ -1,8 +1,8 @@
 """
-Titel: cloudevents.py
+Titel: my_cloudevents.py
 Beschreibung:   Implementiert eine Basisklasse für CloudEvents, die in Azure verwendet werden können.
 Autor: Tim Walter (TechPrototyper)
-Datum: 2024-04-02
+Datum: 2024-04-03
 Version: 1.0.0
 Quellen: [Azure Event Grid], [CloudEvents Spezifikation]
 Kontakt: projekte@tim-walter.net
