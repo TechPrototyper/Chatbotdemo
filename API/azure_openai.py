@@ -84,13 +84,8 @@ class InteractWithOpenAI:
                 user_details = {"email": user_email, "thread_id": thread_id}
                 
                 # Publish UserRegisteredEvent to EventGrid
-                try:
-                    with EventGridPublisher() as publisher:
-                        publisher.send_event(event = UserRegisteredEvent(user_details).to_cloudevent())
-                    logging.info(f"UserRegisteredEvent für {user_email} publiziert.")
-                except Exception as e:
-                    logging.error(f"Fehler beim Publizieren des UserRegisteredEvents: {e}")
-                    raise Exception(f"Fehler beim Publizieren des UserRegisteredEvents: {e}")
+                with EventGridPublisher() as publisher:
+                    publisher.send_event(event = UserRegisteredEvent(user_details).to_cloudevent())
 
             except Exception as e:
                 logging.error(f"Fehler bei der Thread-Erstellung oder -Speicherung: {e}")

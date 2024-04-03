@@ -2,6 +2,9 @@ from azure.eventgrid import EventGridPublisherClient
 from azure.core.credentials import AzureKeyCredential
 import os
 from typing import Optional
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class EventGridPublisher:
 
@@ -37,10 +40,25 @@ class EventGridPublisher:
                 raise ConnectionError(f"Error: could not close EventGridPublisherClient: {e}")
             
     def __enter__(self) -> "EventGridPublisher":
+        logging.info("EventGridPublisherClient opened.")
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
-        self.close()
-        return False
-    
+        # if i am getting here with an exception..
+        if exc_type:
+            logging.error(f"Error: {exc_type}: {exc_val}")
+            self.close()
+            return False
+        else:
+            logging.info("EventGridPublisherClient closed.")
+            self.close()
+            return False
+
+# I need this logic to be implemented here in the __exit__ method:
+
+                # # Publish UserRegisteredEvent to EventGrid
+                #     logging.info(f"UserRegisteredEvent für {user_email} publiziert.")
+                # except Exception as e:
+                #     logging.error(f"Fehler beim Publizieren des UserRegisteredEvents: {e}")
+                #     raise Exception(f"Fehler beim Publizieren des UserRegisteredEvents: {e}"
     
