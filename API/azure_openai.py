@@ -12,7 +12,7 @@ Quellen: [OpenAI API Dokumentation], [Azure Functions Dokumentation], [Azure Tab
 Kontakt: projekte@tim-walter.net
 """
 
-from openai import AzureOpenAI  # Angenommen, dies ist der korrekte Importpfad
+from openai import AzureOpenAI  
 from user_threads import UserThreads
 from typing import Tuple
 import time
