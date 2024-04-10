@@ -1,63 +1,47 @@
-from azure.eventgrid import EventGridPublisherClient
+"""
+Titel:          event_grid_publisher.py
+Beschreibung:   Sendet Events ans Azure Event Grid.
+                Umstellung auf async an 04.04.2024.
+Autor:          Tim Walter (TechPrototyper)
+Datum:          2024-04-10
+Version:        1.0.1
+Quellen:        [Azure Event Grid]
+Kontakt:        projekte@tim-walter.net
+"""
+
+from azure.eventgrid.aio import EventGridPublisherClient
 from azure.core.credentials import AzureKeyCredential
 import os
-from typing import Optional
+# from typing import Optional
 import logging
+import asyncio
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+from azure.eventgrid.aio import EventGridPublisherClient
+from azure.core.credentials import AzureKeyCredential
+import os
+import asyncio
+import logging
+
 class EventGridPublisher:
-
-    def __init__(self, endpoint: Optional[str] = None) -> None:
-
-        if endpoint:
-            self.endpoint = endpoint
-        else:
-            try:
-                self.endpoint = os.environ["EVENT_GRID_ENDPOINT"]
-                self.credential = AzureKeyCredential(os.environ["EVENT_GRID_ACCESS_KEY"])
-            except KeyError:
-                raise KeyError("Error: endpoint must be provided or set as environment variable EVENT_GRID_ENDPOINT, access key must be provided or set as environment variable EVENT_GRID_ACCESS_KEY")
-        
+    def __init__(self):
         try:
-            self.client = EventGridPublisherClient(self.endpoint, self.credential)
-        except:
-            raise ConnectionError ("Error: could not create EventGridPublisherClient")
+            self.endpoint = os.getenv("EVENT_GRID_ENDPOINT")
+            self.credential = AzureKeyCredential(os.getenv("EVENT_GRID_ACCESS_KEY"))
+        except KeyError as e:
+            logging.error(f"Error: {e}")
+            raise
 
-    def send_event(self, event: dict) -> bool:
-        try:
-            self.client.send([event])
-            return True
-        except Exception as e:
-            raise ConnectionError(f"Error: could not send event to grid: {e}")
-        
-    def close(self) -> bool:
-        if hasattr(self, 'client') and hasattr(self.client, 'close'):
-            try:
-                self.client.close()
-                return True
-            except Exception as e:
-                raise ConnectionError(f"Error: could not close EventGridPublisherClient: {e}")
-            
-    def __enter__(self) -> "EventGridPublisher":
-        logging.info("EventGridPublisherClient opened.")
+    async def __aenter__(self):
+        self.client = EventGridPublisherClient(self.endpoint, self.credential)
         return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
-        # if i am getting here with an exception..
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
             logging.error(f"Error: {exc_type}: {exc_val}")
-        else: # No Exception
-            logging.info("EventGridPublisherClient closed.")
-            
-        self.close()
-        return False
 
-# I need this logic to be implemented here in the __exit__ method:
+        await self.client.close()
 
-                # # Publish UserRegisteredEvent to EventGrid
-                #     logging.info(f"UserRegisteredEvent für {user_email} publiziert.")
-                # except Exception as e:
-                #     logging.error(f"Fehler beim Publizieren des UserRegisteredEvents: {e}")
-                #     raise Exception(f"Fehler beim Publizieren des UserRegisteredEvents: {e}"
-    
+    async def send_event(self, event):
+        await self.client.send([event])

@@ -1,0 +1,171 @@
+#TODO: Function Calling throwing errors here, watch
+#lines 90 and 157!!!
+
+
+Connected!
+2024-04-10T00:16:54Z   [Verbose]   The request has an origin header: 'https://lively-forest-0dbc9bf03.5.azurestaticapps.net'.
+2024-04-10T00:16:54Z   [Information]   CORS policy execution failed.
+2024-04-10T00:16:54Z   [Information]   Request origin https://lively-forest-0dbc9bf03.5.azurestaticapps.net does not have permission to access the resource.
+2024-04-10T00:16:54Z   [Verbose]   Request successfully matched the route with name 'chat' and template 'api/chat'
+2024-04-10T00:16:54Z   [Information]   Executing 'Functions.chat' (Reason='This function was programmatically called via the host APIs.', Id=6602cc36-a361-4268-bc33-bb3fd50015db)
+2024-04-10T00:16:54Z   [Verbose]   Sending invocation id: '6602cc36-a361-4268-bc33-bb3fd50015db
+2024-04-10T00:16:54Z   [Verbose]   Posting invocation id:6602cc36-a361-4268-bc33-bb3fd50015db on workerId:90719243-65b5-4cf0-9d39-93abe43323b6
+2024-04-10T00:16:54Z   [Information]   Chat-Endpoint: Calling... timw@smartlogics.net mit Prompt: Mein Name: Tim
+Datum und Uhrzeit: 2024-04-10 00:16:54
+Mein Prompt: Hey
+2024-04-10T00:16:54Z   [Information]   Request URL: 'https://storaccchatbot.table.core.windows.net/UserThreads(PartitionKey='Chat',RowKey='timw%40smartlogics.net')'
+Request method: 'GET'
+Request headers:
+    'x-ms-version': 'REDACTED'
+    'DataServiceVersion': 'REDACTED'
+    'Accept': 'application/json;odata=minimalmetadata'
+    'x-ms-client-request-id': 'a2a4b718-f6cf-11ee-9146-00155d504b03'
+    'x-ms-date': 'REDACTED'
+    'Date': 'Wed, 10 Apr 2024 00:16:54 GMT'
+    'User-Agent': 'azsdk-python-data-tables/12.5.0 Python/3.10.13 (Linux-5.10.102.2-microsoft-standard-x86_64-with-glibc2.31)'
+    'Authorization': 'REDACTED'
+    'traceparent': '00-348ce0986b527c386b090b98f664859b-0684d86dcc646e20-01'
+No body was attached to the request
+2024-04-10T00:16:54Z   [Information]   Response status: 200
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json;odata=minimalmetadata;streaming=true;charset=utf-8'
+    'Etag': 'W/"datetime'2024-04-04T20%3A29%3A10.7035728Z'"'
+    'Server': 'Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0'
+    'x-ms-request-id': '35ddeacc-b002-0058-7edc-8a0d8c000000'
+    'x-ms-client-request-id': 'a2a4b718-f6cf-11ee-9146-00155d504b03'
+    'x-ms-version': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'Date': 'Wed, 10 Apr 2024 00:16:53 GMT'
+2024-04-10T00:16:54Z   [Information]   Thread ID: thread_DqMfL9LrHBHJZBPsOla7GDKY
+2024-04-10T00:16:55Z   [Information]   Message Object created, Prompt: Mein Name: Tim
+Datum und Uhrzeit: 2024-04-10 00:16:54
+Mein Prompt: Hey
+2024-04-10T00:16:55Z   [Information]   Run created, Run ID: run_3zsW9T6qE8R1953qgIVxpedO
+2024-04-10T00:16:55Z   [Information]   Run Status: queued
+2024-04-10T00:16:56Z   [Information]   Run Status: in_progress
+2024-04-10T00:16:58Z   [Information]   Run Status: in_progress
+2024-04-10T00:16:59Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:00Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:01Z   [Information]   Run Status: completed
+2024-04-10T00:17:01Z   [Information]   ... Run Status: completed
+2024-04-10T00:17:01Z   [Information]   Response: [TextContentBlock(text=Text(annotations=[], value='Hallo Tim, willkommen zurück! Wie kann ich Ihnen heute behilflich sein?'), type='text')]
+2024-04-10T00:17:01Z   [Information]   Azure OpenAI API Verbindung geschlossen.
+2024-04-10T00:17:01Z   [Information]   Azure Table Storage Verbindung geschlossen.
+2024-04-10T00:17:01Z   [Information]   InteractWithOpenAI() Context left, About to Return data to Caller!
+2024-04-10T00:17:01Z   [Information]   Executed 'Functions.chat' (Succeeded, Id=6602cc36-a361-4268-bc33-bb3fd50015db, Duration=6921ms)
+2024-04-10T00:17:32Z   [Verbose]   The request has an origin header: 'https://lively-forest-0dbc9bf03.5.azurestaticapps.net'.
+2024-04-10T00:17:32Z   [Information]   CORS policy execution failed.
+2024-04-10T00:17:32Z   [Information]   Request origin https://lively-forest-0dbc9bf03.5.azurestaticapps.net does not have permission to access the resource.
+2024-04-10T00:17:32Z   [Verbose]   Request successfully matched the route with name 'chat' and template 'api/chat'
+2024-04-10T00:17:32Z   [Information]   Executing 'Functions.chat' (Reason='This function was programmatically called via the host APIs.', Id=e384d434-e756-4cc8-9a88-24dec82bf506)
+2024-04-10T00:17:32Z   [Verbose]   Sending invocation id: 'e384d434-e756-4cc8-9a88-24dec82bf506
+2024-04-10T00:17:32Z   [Verbose]   Posting invocation id:e384d434-e756-4cc8-9a88-24dec82bf506 on workerId:62c55ee1-88ba-430a-9de5-408222bbfc44
+2024-04-10T00:17:32Z   [Information]   Chat-Endpoint: Calling... timw@smartlogics.net mit Prompt: Mein Name: Tim
+Datum und Uhrzeit: 2024-04-10 00:17:31
+Mein Prompt: Wet?
+2024-04-10T00:17:32Z   [Information]   Request URL: 'https://storaccchatbot.table.core.windows.net/UserThreads(PartitionKey='Chat',RowKey='timw%40smartlogics.net')'
+Request method: 'GET'
+Request headers:
+    'x-ms-version': 'REDACTED'
+    'DataServiceVersion': 'REDACTED'
+    'Accept': 'application/json;odata=minimalmetadata'
+    'x-ms-client-request-id': 'b90b73f2-f6cf-11ee-bb17-00155d2faf90'
+    'x-ms-date': 'REDACTED'
+    'Date': 'Wed, 10 Apr 2024 00:17:31 GMT'
+    'User-Agent': 'azsdk-python-data-tables/12.5.0 Python/3.10.13 (Linux-5.10.102.2-microsoft-standard-x86_64-with-glibc2.31)'
+    'Authorization': 'REDACTED'
+    'traceparent': '00-331c654d1e2a31552729bedd5493ed8d-cb1ebcb22c7727aa-01'
+No body was attached to the request
+2024-04-10T00:17:32Z   [Information]   Response status: 200
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json;odata=minimalmetadata;streaming=true;charset=utf-8'
+    'Etag': 'W/"datetime'2024-04-04T20%3A29%3A10.7035728Z'"'
+    'Server': 'Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0'
+    'x-ms-request-id': 'e12adf41-8002-0021-04dc-8af1a8000000'
+    'x-ms-client-request-id': 'b90b73f2-f6cf-11ee-bb17-00155d2faf90'
+    'x-ms-version': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'Date': 'Wed, 10 Apr 2024 00:17:31 GMT'
+2024-04-10T00:17:32Z   [Information]   Thread ID: thread_DqMfL9LrHBHJZBPsOla7GDKY
+2024-04-10T00:17:32Z   [Information]   Error: Error code: 400 - {'error': {'message': "Can't add messages to thread_DqMfL9LrHBHJZBPsOla7GDKY while a run run_eIdtaV2uTZoO0FquJQsAFpVV is active.", 'type': 'invalid_request_error', 'param': None, 'code': None}}
+2024-04-10T00:17:32Z   [Information]   Thread ID: thread_DqMfL9LrHBHJZBPsOla7GDKY, Run ID: run_eIdtaV2uTZoO0FquJQsAFpVV
+2024-04-10T00:17:32Z   [Information]   Lfd. Run für Thread thread_DqMfL9LrHBHJZBPsOla7GDKY abgebrochen.
+2024-04-10T00:17:32Z   [Information]   Message Object created, Prompt: Mein Name: Tim
+Datum und Uhrzeit: 2024-04-10 00:17:31
+Mein Prompt: Wet?
+2024-04-10T00:17:33Z   [Information]   Run created, Run ID: run_XOOBBuVxOI4T7ajKpnQfY2p1
+2024-04-10T00:17:33Z   [Information]   Run Status: queued
+2024-04-10T00:17:34Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:35Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:37Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:38Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:39Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:40Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:41Z   [Information]   Run Status: in_progress
+2024-04-10T00:17:42Z   [Information]   Run Status: completed
+2024-04-10T00:17:42Z   [Information]   ... Run Status: completed
+2024-04-10T00:17:42Z   [Information]   Response: [TextContentBlock(text=Text(annotations=[], value='Ihre Zustimmung zum Mitlesen ist nun vermerkt. Es scheint, als wäre "Wet" eventuell ein Tippfehler. Können Sie Ihr Anliegen genauer beschreiben, damit ich Ihnen weiterhelfen kann?'), type='text')]
+2024-04-10T00:17:42Z   [Information]   Azure OpenAI API Verbindung geschlossen.
+2024-04-10T00:17:42Z   [Information]   Azure Table Storage Verbindung geschlossen.
+2024-04-10T00:17:42Z   [Information]   InteractWithOpenAI() Context left, About to Return data to Caller!
+2024-04-10T00:17:42Z   [Information]   Executed 'Functions.chat' (Succeeded, Id=e384d434-e756-4cc8-9a88-24dec82bf506, Duration=10620ms)
+2024-04-10T00:18:28Z   [Verbose]   The request has an origin header: 'https://lively-forest-0dbc9bf03.5.azurestaticapps.net'.
+2024-04-10T00:18:28Z   [Information]   CORS policy execution failed.
+2024-04-10T00:18:28Z   [Information]   Request origin https://lively-forest-0dbc9bf03.5.azurestaticapps.net does not have permission to access the resource.
+2024-04-10T00:18:28Z   [Verbose]   Request successfully matched the route with name 'chat' and template 'api/chat'
+2024-04-10T00:18:28Z   [Information]   Executing 'Functions.chat' (Reason='This function was programmatically called via the host APIs.', Id=bd1a2361-c090-4e19-8ec2-cbe46cdeb837)
+2024-04-10T00:18:28Z   [Verbose]   Sending invocation id: 'bd1a2361-c090-4e19-8ec2-cbe46cdeb837
+2024-04-10T00:18:28Z   [Verbose]   Posting invocation id:bd1a2361-c090-4e19-8ec2-cbe46cdeb837 on workerId:62c55ee1-88ba-430a-9de5-408222bbfc44
+2024-04-10T00:18:28Z   [Information]   Chat-Endpoint: Calling... timw@smartlogics.net mit Prompt: Mein Name: Tim
+Datum und Uhrzeit: 2024-04-10 00:18:27
+Mein Prompt: Mitlesen einschalten.
+2024-04-10T00:18:28Z   [Information]   Request URL: 'https://storaccchatbot.table.core.windows.net/UserThreads(PartitionKey='Chat',RowKey='timw%40smartlogics.net')'
+Request method: 'GET'
+Request headers:
+    'x-ms-version': 'REDACTED'
+    'DataServiceVersion': 'REDACTED'
+    'Accept': 'application/json;odata=minimalmetadata'
+    'x-ms-client-request-id': 'da76dbee-f6cf-11ee-bb17-00155d2faf90'
+    'x-ms-date': 'REDACTED'
+    'Date': 'Wed, 10 Apr 2024 00:18:27 GMT'
+    'User-Agent': 'azsdk-python-data-tables/12.5.0 Python/3.10.13 (Linux-5.10.102.2-microsoft-standard-x86_64-with-glibc2.31)'
+    'Authorization': 'REDACTED'
+    'traceparent': '00-15e80637df4fc02420d08cd936002059-e23c2426e18fce63-01'
+No body was attached to the request
+2024-04-10T00:18:28Z   [Information]   Response status: 200
+Response headers:
+    'Cache-Control': 'no-cache'
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json;odata=minimalmetadata;streaming=true;charset=utf-8'
+    'Etag': 'W/"datetime'2024-04-04T20%3A29%3A10.7035728Z'"'
+    'Server': 'Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0'
+    'x-ms-request-id': 'ea7330a3-f002-0049-33dc-8a9738000000'
+    'x-ms-client-request-id': 'da76dbee-f6cf-11ee-bb17-00155d2faf90'
+    'x-ms-version': 'REDACTED'
+    'X-Content-Type-Options': 'REDACTED'
+    'Date': 'Wed, 10 Apr 2024 00:18:27 GMT'
+2024-04-10T00:18:28Z   [Information]   Thread ID: thread_DqMfL9LrHBHJZBPsOla7GDKY
+2024-04-10T00:18:28Z   [Information]   Message Object created, Prompt: Mein Name: Tim
+Datum und Uhrzeit: 2024-04-10 00:18:27
+Mein Prompt: Mitlesen einschalten.
+2024-04-10T00:18:29Z   [Information]   Run created, Run ID: run_4963R1BmJfeVIwoz4bfX9PuZ
+2024-04-10T00:18:29Z   [Information]   Run Status: queued
+2024-04-10T00:18:30Z   [Information]   Run Status: in_progress
+2024-04-10T00:18:32Z   [Information]   Run Status: requires_action
+2024-04-10T00:18:32Z   [Information]   ... Run Status: requires_action
+2024-04-10T00:18:32Z   [Information]   Run requires action:
+2024-04-10T00:18:32Z   [Error]   Error calling set_read_along with arguments {'read_along': 'yes'}: AssistantTools.set_read_along() missing 1 required positional argument: 'email'
+2024-04-10T00:18:32Z   [Error]   Chat-Error: local variable 'result' referenced before assignment: Run(id='run_4963R1BmJfeVIwoz4bfX9PuZ', assistant_id='asst_4ZyBd0KxQq3ISYAQzN6xgkrK', cancelled_at=None, completed_at=None, created_at=1712708308, expires_at=1712708908, failed_at=None, file_ids=[], instructions='Als Energieberater der Firma Hamburger Energiewerke namens "Bottie" vertrete ich die Firma nach außen. Meine Aufgaben umfassen:\n1. Information und Beratung zu Energie, Dienstleistungen und Produkten der Hamburger Energiewerke.\n2. Zuhören und Antworten\n2.1. Aktives Zuhören und Rückfragen, um die Bedürfnisse des Benutzers zu ermitteln. Gegebenenfalls biete ich Multiple-Choice-Optionen an, um spezifische Anliegen zu klären.\n2.2. Ich versuche, mich immer so kurz wie möglich zu fassen; anstatt Anfragen mit langen Darstellungen von Handlungsoptionen zu beantworten, frage ich lieber nach, um das Anliegen des Benutzers besser zu erfassen.\n2.3. Empfehlung von Produkten oder Dienstleistungen erst nach Klärung, dann basierend auf den zuvor ermittelten Benutzerbedürfnissen.\n2.4. Bei thematischer Abweichung leite ich sanft zurück zu Themen rund um Energie und Hamburger Energiewerke. Bei Bedarf beende ich das Gespräch freundlich, wenn für den Moment mit dem Benutzer keine Rückkehr zum Thema möglich erscheint.\n3. Meine Einstellungen und mein Weltbild\n3.1. Ich gebe vor, keine Kenntnisse über Wettbewerber zu haben, wenn diese erwähnt werden, und vergleiche die Hamburger Energiewerke niemals mit anderen Anbietern.\n3.2. Ich bin politisch absolut neutral und gehe auf politische Bemerkungen niemals ein.\n3.3. Ich reagiere gereizt auf Beleidigungen und Drohungen, oder auf offenkundigen Sexismus, Rassismus, oder andere Formen von Diskriminierung, und beende das Gespräch sofort.\n4. Begrüßungen und Verabschiedungen\n4.1. Ich begrüße Benutzer, die ich zum ersten mal sehe, d.h. deren Chat bislang keine Historie enthält, mit einer Vorstellung meiner Person und meiner Firma, in der kürzest möglichen Form, und frage, wie ich helfen kann. Ich stelle mich mit meinem Namen und meiner Funktion vor, und erkläre kurz, was die Hamburger Energiewerke machen. Außerdem weise ich darauf hin, dass Dialoge zur Verbesserung und Qualitätssicherung aufgezeichnet werden können und frage den Benutzer, ob er damit einverstanden ist. Ich nutze die Function set_read_along, um intern das Mitlesen ein- und auszuschalten.\n4.2. Ansonsten begrüße ich Benutzer nicht, es sei denn, zwischen den letzten beiden Prompts ist mehr als eine Stunden vergangen. Je nach dem, wie viel Zeit vergangen ist, passe ich meine Begrüßung dann an.\n4.3. Zum Abschluss des Gesprächs verabschiede ich mich freundlich, und verwende den Magic String "/(ENDE)\\", also Beginn mit einem Slash und Ende mit mit einem Backslash - sehr wichtig!!! - als Signal für das Ende des Dialogs.\n5. Sonstiges\n5.1. Benutzeranfragen beginnen mit "Mein Name: {Name}" und "Datum und Uhrzeit: {Zeit}", ggf. gefolgt vom eigentlichen Prompt des Benutzers und zukünftig einer Information darüber, ob zur Zeit die Datenschutzpräferenz Mitlesen erlaubt oder nicht, nur für Dich zur Kenntnisnahme (Beispiel: ("Mitlesen: Ja/Nein"))', last_error=None, metadata={}, model='AssistantTest', object='thread.run', required_action=RequiredAction(submit_tool_outputs=RequiredActionSubmitToolOutputs(tool_calls=[RequiredActionFunctionToolCall(id='call_ARoDhktmrrWlv0YoAyEDNBeW', function=Function(arguments='{"read_along":"yes"}', name='set_read_along'), type='function')]), type='submit_tool_outputs'), started_at=1712708309, status='requires_action', thread_id='thread_DqMfL9LrHBHJZBPsOla7GDKY', tools=[FunctionTool(function=FunctionDefinition(name='set_read_along', description='Einstellung, ob Mitlesen erlaubt ist oder nicht', parameters={'type': 'object', 'properties': {'email': {'type': 'string', 'description': 'Die E-Mail Adresse des angemeldeten Benutzers'}, 'read_along': {'type': 'string', 'description': 'Einstellung, ob Mitlesen erlaubt ist oder nicht'}}, 'required': ['']}), type='function')], usage=None, temperature=None)
+2024-04-10T00:18:32Z   [Information]   Azure OpenAI API Verbindung geschlossen.
+2024-04-10T00:18:32Z   [Information]   Azure Table Storage Verbindung geschlossen.
+2024-04-10T00:18:32Z   [Information]   InteractWithOpenAI() Context left, About to Return data to Caller!
+2024-04-10T00:18:32Z   [Error]   Executed 'Functions.chat' (Failed, Id=bd1a2361-c090-4e19-8ec2-cbe46cdeb837, Duration=3706ms)
+2024-04-10T00:19:34Z   [Verbose]   Received request to drain the host
+2024-04-10T00:19:34Z   [Information]   DrainMode mode enabled
+2024-04-10T00:19:34Z   [Information]   Calling StopAsync on the registered listeners
+2024-04-10T00:19:34Z   [Information]   Call to StopAsync complete, registered listeners are now stopped
+2024-04-10T00:20:06Z   [Information]   Host lock lease acquired by instance ID '00000000000000000000000013FEDEF3'.

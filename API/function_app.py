@@ -2,25 +2,29 @@
 Titel: function_app.py
 Beschreibung:   Implementiert eine Azure Function App mit verschiedenen Routen bzw. Endpunkten.
                 Programmiermodell Version 2, im "FastAPI-Style".
+                Jetzt vollständig auf Async umgestellt.
 
 Autor: Tim Walter (TechPrototyper)
-Datum: 2024-03-28
+Datum: 2024-04-10
 Version: 1.0.0
 Quellen: [OpenAI API Dokumentation], [Azure Functions Dokumentation], [Azure Table Storage Dokumentation]
 Kontakt: projekte@tim-walter.net
 """
 
 import azure.functions as func
+from azure.monitor.opentelemetry import configure_azure_monitor
+from opentelemetry import trace
 import logging
 from datetime import datetime
 from azure_openai import InteractWithOpenAI
-
+import aiohttp  
 
 
 # Initialisierung der Funktion App
     
 # Konfiguration des Loggings
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+configure_azure_monitor()
 
 # Erstellen der Funktion App
 
@@ -66,7 +70,7 @@ def mock(req: func.HttpRequest) -> func.HttpResponse:
 
 # Hauptendpunkt für den Chat
 @app.route(route="chat", methods=["GET", "POST"])
-def chat(req: func.HttpRequest) -> func.HttpResponse:
+async def chat(req: func.HttpRequest) -> func.HttpResponse:
     """
     Haupt-Chat-Endpoint, verbindet sich mit einem Backend-Service zur Verarbeitung der Anfragen.
     """
@@ -82,11 +86,28 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     # Prompt für OpenAI erstellen
     prompt = f"Mein Name: {params.user_name}\nDatum und Uhrzeit: {time_stamp}\nMein Prompt: {params.user_prompt}"
 
-    with InteractWithOpenAI() as interaction:
-        http_status, response = interaction.chat(params.user_email, prompt)
+    # async with InteractWithOpenAI() as interaction:
+    #     logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {prompt}")
+    #     http_status, response = await interaction.chat(params.user_email, prompt)
+    #     logging.info(f"Chat-Endpoint came back: Response: {http_status}: {response}")
 
-    return func.HttpResponse(response, status_code=http_status)
+    interaction = InteractWithOpenAI()
+    try:
+        logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {prompt}")
+        http_status, response = await interaction.chat(params.user_email, prompt)
+        # logging.info(f"Chat-Endpoint came back: Response: {http_status}: {response}")
+    finally:
+        await interaction.close()
 
+    logging.info("InteractWithOpenAI() Context left, About to Return data to Caller!"  )
+
+    response_body = response[0].text.value
+
+    try:
+        return func.HttpResponse(response_body, status_code=http_status, headers={"Content-Type": "text/plain; charset=utf-8"})
+    except Exception as e:
+        logging.error(f"Error returning the response: {e}")
+        return func.HttpResponse("Internal server error", status_code=500)
 
 # Ping- und Status-Endpunkte, noch zu implementieren
 # Ggf. separate Parameter-Klassen für Ping und Status implementieren

@@ -4,7 +4,9 @@ Titel: o_openai.py
 Beschreibung:   Stellt die Kommunikation zwischen der Funktion App und der OpenAI API her.
                 OpenAI Backend.
                 "Schwesterdatei" ist azure_openai.py, die auf OpenAI-Endpunkte in Azure zugreift.
-
+                Anmerkung, 4.4.2024: Die Datei ist nicht mehr auf Stand und muss gelegentlich
+                nachgezogen werden.
+                
 Autor: Tim Walter (TechPrototyper)
 Datum: 2024-03-28
 Version: 1.0.0

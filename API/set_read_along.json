@@ -1,0 +1,20 @@
+{
+  "name": "set_read_along",
+  "description": "Einstellung, ob Mitlesen erlaubt ist oder nicht",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "description": "Die E-Mail Adresse des angemeldeten Benutzers"
+      },
+      "read_along": {
+        "type": "string",
+        "description": "Einstellung, ob Mitlesen erlaubt ist oder nicht"
+      }
+    },
+    "required": [
+      ""
+    ]
+  }
+}
