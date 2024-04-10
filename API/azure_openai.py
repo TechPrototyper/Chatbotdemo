@@ -161,7 +161,6 @@ class InteractWithOpenAI:
             async with EventGridPublisher() as publisher:
                 await publisher.send_event(event = PromptFromUserEvent(details).to_cloudevent())
                 logging.info(f"Prompt von Benutzer {user_email} an EventGrid gesendet.")
-        await u.close
 
         # Create Prompt 
         # Timestamp für Prompt erstellen
