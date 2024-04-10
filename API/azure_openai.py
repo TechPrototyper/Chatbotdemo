@@ -152,25 +152,26 @@ class InteractWithOpenAI:
         :return: Der Antworttext des Assistenten.
         """
 
-        # Methode zu lang. Aufteilung im kommenden Update.
-        u = UserThreads()
-        transscript_allowed = await u.get_extended_events(user_email)
-
-        if transscript_allowed == 1:
-            details = {"email": user_email, "Name: ": user_name,"prompt": user_prompt}
-            async with EventGridPublisher() as publisher:
-                await publisher.send_event(event = PromptFromUserEvent(details).to_cloudevent())
-                logging.info(f"Prompt von Benutzer {user_email} an EventGrid gesendet.")
-
-        # Create Prompt 
-        # Timestamp für Prompt erstellen
-        time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        logging.info(f"Timestamp: {time_stamp}")
-        modified_prompt = f"Mein Name: {user_name}\nDatum und Uhrzeit: {time_stamp}\nMitlesen erlaubt: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
-        logging.info(f"Modified Prompt: created.")
         try:                
+            # Prüfen, ob der Benutzer Transskripte erlaubt
             thread_id = await self.get_or_create_thread(user_email)
             logging.info(f"Thread ID: {thread_id}")
+
+            # Create prompt with user details
+            time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logging.info(f"Timestamp: {time_stamp}")
+            modified_prompt = f"Mein Name: {user_name}\nDatum und Uhrzeit: {time_stamp}\nMitlesen erlaubt: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
+            logging.info(f"Modified Prompt: created.")
+
+            u = UserThreads()
+            transscript_allowed = await u.get_extended_events(user_email)
+
+            if transscript_allowed == 1:
+                details = {"email": user_email, "Name: ": user_name,"prompt": user_prompt}
+                async with EventGridPublisher() as publisher:
+                    await publisher.send_event(event = PromptFromUserEvent(details).to_cloudevent())
+                    logging.info(f"Prompt von Benutzer {user_email} an EventGrid gesendet.")
+            
 
             while True:
             # Neue Nachricht erzeugen
