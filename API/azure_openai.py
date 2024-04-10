@@ -26,6 +26,7 @@ from my_cloudevents import *
 from event_grid_publisher import EventGridPublisher
 from assistant_tools import AssistantTools
 import re
+from datetime import datetime
 
 
 # Konfiguration des Loggings
