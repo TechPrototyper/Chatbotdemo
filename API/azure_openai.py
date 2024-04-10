@@ -183,13 +183,11 @@ class InteractWithOpenAI:
                     ))
                     logging.info(f"Message Object ist ok.")
 
-                    details = {"email": user_email, "Name: ": user_name,"prompt": modified_prompt}
-                    async with EventGridPublisher() as publisher:
-                        await publisher.send_event(event = PromptToAIEvent(details).to_cloudevent())
-                        logging.info(f"Modifiziertes Prompt zum Backend an EventGrid gesendet.")
-                    
-                    logging.info("Prompt für Backend an EventGrid gesendet.")
-
+                    if transscript_allowed == 1:
+                        details = {"email": user_email, "Name: ": user_name,"prompt": modified_prompt}
+                        async with EventGridPublisher() as publisher:
+                            await publisher.send_event(event = PromptToAIEvent(details).to_cloudevent())
+                            logging.info(f"Modifiziertes Prompt zum Backend an EventGrid gesendet.")
                     break
                 except Exception as e:
                     logging.info(f"Error: {e}")
@@ -254,11 +252,23 @@ class InteractWithOpenAI:
                             response_body = return_prompt[0].text.value     
                             logging.info(f"Response: {response_body}")
 
-                            details = {"email": user_email, "Name: ": user_name,"ai_prompt": response_body}
-                            async with EventGridPublisher() as publisher:
-                                await publisher.send_event(event = PromptFromAIEvent(details).to_cloudevent())
-                                logging.info(f"Prompt von der AI für Benutzer {user_email} an EventGrid gesendet.")
-                                                        
+                            if transscript_allowed == 1:
+                                details = {"email": user_email, "Name: ": user_name,"ai_prompt": response_body}
+                                async with EventGridPublisher() as publisher:
+                                    await publisher.send_event(event = PromptToUserEvent(details).to_cloudevent())
+                                    logging.info(f"Prompt von der AI für Benutzer {user_email} an EventGrid gesendet.")
+                                    
+                                # Diese Code ist zwar fast gleich; aber im Prinzip sind es zwei Events; einmal die
+                                # Message vom Backend an den Middletier, und einmal die Message vom Middletier
+                                # an das Frontend. Hier ist tatsächlich alles gleich, aber es kann sich evtl. später
+                                # später noch ändern. Es könnte z.B. auch sein, dass Magic Strings gefiltert werden müssen,
+                                # o.Ä.
+
+                                details = {"email": user_email, "Name: ": user_name,"prompt": response_body}
+                                async with EventGridPublisher() as publisher:
+                                    await publisher.send_event(event = PromptFromAIEvent(details).to_cloudevent())
+                                    logging.info(f"Prompt an der Frontend zum Benutzer {user_email} an EventGrid gesendet.")
+                                
                             return 200, response_body
                         else:
                             return 200, "Da fällt mir im Moment gerade nichts zu ein (Leere Nachricht von der KI)."

@@ -17,9 +17,6 @@ from opentelemetry import trace
 import logging
 from datetime import datetime
 from azure_openai import InteractWithOpenAI
-import aiohttp  
-from event_grid_publisher import EventGridPublisher
-from my_cloudevents import PromptToUserEvent
 
 
 # Initialisierung der Funktion App
@@ -73,9 +70,12 @@ def mock(req: func.HttpRequest) -> func.HttpResponse:
 # Hauptendpunkt für den Chat
 @app.route(route="chat", methods=["GET", "POST"])
 async def chat(req: func.HttpRequest) -> func.HttpResponse:
+    # Make this a nice Docstring here, please:
     """
-    Haupt-Chat-Endpoint, verbindet sich mit einem Backend-Service zur Verarbeitung der Anfragen.
+    Hauptendpunkt für den Chat mit OpenAI.
     """
+
+    
     # Parameter aus der Anfrage extrahieren.
     try:
       params = ChatRequestParams(req)
@@ -95,13 +95,6 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
     finally:
         await interaction.close()
 
-    logging.info("InteractWithOpenAI() Context left, About to Return data to Caller!"  )
-
-    details = {"email": params.user_email, "Name: ": params.user_name, "prompt": response_body}
-    async with EventGridPublisher() as publisher:
-        await publisher.send_event(event = PromptToUserEvent(details).to_cloudevent())
-        logging.info(f"Antwort-Prompt an {params.user_email} an EventGrid gesendet.")
-        
     try:
         return func.HttpResponse(response_body, status_code=http_status, headers={"Content-Type": "text/plain; charset=utf-8"})
     except Exception as e:
