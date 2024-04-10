@@ -58,12 +58,12 @@ class AssistantTools:
         if tool_call.type == "function": # Other types not handled here yet
             function_name = tool_call.function.name
             args = json.loads(tool_call.function.arguments)
-            logging.debug(f"I shall call function {function_name} with arguments {args}")
+            logging.info(f"I shall call function {function_name} with arguments {args}")
             method = getattr(self, function_name, None)
             if method:
-                logging.debug(f"Method found in AssistantTools Class - calling {function_name} with arguments {args}")
+                logging.info(f"Method found in AssistantTools Class - calling {function_name} with arguments {args}")
                 try:
-                    logging.debug(f"Calling {function_name} with arguments {args}")
+                    logging.info(f"Calling {function_name} with arguments {args}")
                     output_value = await method(**args)
                     result = {"tool_call_id": tool_call.id, "output": output_value}
                 except Exception as e:

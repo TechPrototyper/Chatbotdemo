@@ -22,7 +22,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import os
 import logging
-from my_cloudevents import UserRegisteredEvent
+from my_cloudevents import *
 from event_grid_publisher import EventGridPublisher
 from assistant_tools import AssistantTools
 import re
@@ -109,6 +109,12 @@ class InteractWithOpenAI:
         try:
             self.threads = UserThreads()
             thread_id = await self.threads.get_id(user_email)
+
+            #TODO: Zu viel Code Alarm, muss gestrafft werden: 3 Zeilen für einen Event sind zu viel.
+            user_details = {"email": user_email, "thread_id": thread_id}
+            async with EventGridPublisher() as publisher:
+                await publisher.send_event(event = UserLoginEvent(user_details).to_cloudevent())
+
         except LookupError:
             try:
                 # thread = self.client.beta.threads.create() 
@@ -117,7 +123,8 @@ class InteractWithOpenAI:
                 await self.threads.set_id(user_email, thread_id)
                 
                 #TODO: Weitere Properties des Benutzers speichern
-                #TODO: Async für Event Händling prüfen
+
+                #TODO: Zu viel Code Alarm, siehe oben.
                 user_details = {"email": user_email, "thread_id": thread_id}
                 
                 # Publish UserRegisteredEvent to EventGrid
@@ -143,6 +150,8 @@ class InteractWithOpenAI:
         :type prompt: str
         :return: Der Antworttext des Assistenten.
         """
+
+        # Methode zu lang. Aufteilung im kommenden Update.
 
         try:                
             thread_id = await self.get_or_create_thread(user_email)
