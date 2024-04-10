@@ -15,6 +15,17 @@ Quellen: [OpenAI API Dokumentation], [Azure Functions Dokumentation], [Azure Tab
 Kontakt: projekte@tim-walter.net
 """
 
+"""
+Das Modul ist nun nach einer guten Woche mit Commits doch eher "unkontrolliert" gewachsen;
+innerhalb kurzer Zeit kam die Umstellung auf async/await, das Erzeugen von Events,
+die Einbettung von Functions der Assistant-API und deren Abarbeiten und weitere Elemente
+dazu.
+
+Ein neues Codefile mit verbesserter Struktur und verringerten Lines of Code ist fertig, aber noch nicht lauffähig.
+Deployment bzw. Ersetzen dieses Moduls kurzfristig.
+"""
+
+
 from openai import AzureOpenAI  # Angenommen, dies ist der korrekte Importpfad
 from user_threads import UserThreads
 # from typing import Tuple
