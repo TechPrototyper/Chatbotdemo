@@ -140,7 +140,7 @@ class InteractWithOpenAI:
         
         return thread_id
 
-    async def chat(self, user_email: str, prompt: str):
+    async def chat(self, user_name: str, user_email: str, user_prompt: str):
         """
         Sendet den Prompt des Benutzers an den Azure-spezifischen Assistant und verarbeitet die Antwort.
 
@@ -152,6 +152,20 @@ class InteractWithOpenAI:
         """
 
         # Methode zu lang. Aufteilung im kommenden Update.
+        u = UserThreads()
+        transscript_allowed = await u.get_extended_events(user_email)
+
+        if transscript_allowed == 1:
+            details = {"email": user_email, "Name: ": user_name,"prompt": user_prompt}
+            async with EventGridPublisher() as publisher:
+                await publisher.send_event(event = PromptFromUserEvent(details).to_cloudevent())
+                logging.info(f"Prompt von Benutzer {user_email} an EventGrid gesendet.")
+        await u.close
+
+        # Create Prompt 
+        # Timestamp für Prompt erstellen
+        time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        modified_prompt = f"Mein Name: {user_name}\nDatum und Uhrzeit: {time_stamp}\nMitlesen erlaubt: {transscript_allowed}\nMein Prompt: {user_prompt}"
 
         try:                
             thread_id = await self.get_or_create_thread(user_email)
@@ -163,8 +177,14 @@ class InteractWithOpenAI:
                     await self.async_api_call(lambda: self.client.beta.threads.messages.create(
                         thread_id=thread_id,
                         role="user",
-                        content=prompt
+                        content=modified_prompt
                     ))
+
+                    details = {"email": user_email, "Name: ": user_name,"prompt": modified_prompt}
+                    async with EventGridPublisher() as publisher:
+                        await publisher.send_event(event = PromptToAIEvent(details).to_cloudevent())
+                        logging.info(f"Modifiziertes Prompt zum Backend an EventGrid gesendet.")
+
                     break
                 except Exception as e:
                     logging.info(f"Error: {e}")
@@ -227,6 +247,12 @@ class InteractWithOpenAI:
                         if messages.data and len(messages.data) > 0 and messages.data[0].content:
                             return_prompt = messages.data[0].content                 
                             logging.info(f"Response: {return_prompt}")
+
+                            details = {"email": user_email, "Name: ": user_name,"ai_prompt": return_prompt}
+                            async with EventGridPublisher() as publisher:
+                                await publisher.send_event(event = PromptFromAIEvent(details).to_cloudevent())
+                                logging.info(f"Prompt von der AI für Benutzer {user_email} an EventGrid gesendet.")
+
                             return 200, return_prompt
                         else:
                             return 200, "Da fällt mir im Moment gerade nichts zu ein (Leere Nachricht von der KI)."

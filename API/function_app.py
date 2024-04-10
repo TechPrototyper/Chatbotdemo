@@ -18,6 +18,8 @@ import logging
 from datetime import datetime
 from azure_openai import InteractWithOpenAI
 import aiohttp  
+from event_grid_publisher import EventGridPublisher
+from my_cloudevents import PromptToUserEvent
 
 
 # Initialisierung der Funktion App
@@ -80,12 +82,6 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
       return func.HttpResponse(f"An error has occured: {e}", status_code=400)
 
-    # Timestamp für Prompt erstellen
-    time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Prompt für OpenAI erstellen
-    prompt = f"Mein Name: {params.user_name}\nDatum und Uhrzeit: {time_stamp}\nMein Prompt: {params.user_prompt}"
-
     # async with InteractWithOpenAI() as interaction:
     #     logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {prompt}")
     #     http_status, response = await interaction.chat(params.user_email, prompt)
@@ -93,8 +89,8 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
 
     interaction = InteractWithOpenAI()
     try:
-        logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {prompt}")
-        http_status, response = await interaction.chat(params.user_email, prompt)
+        logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {params.user_prompt}")
+        http_status, response = await interaction.chat(params.user_name, params.user_email, params.user_prompt)
         # logging.info(f"Chat-Endpoint came back: Response: {http_status}: {response}")
     finally:
         await interaction.close()
@@ -103,6 +99,11 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
 
     response_body = response[0].text.value
 
+    details = {"email": params.user_email, "Name: ": params.user_name, "prompt": response_body}
+    async with EventGridPublisher() as publisher:
+        await publisher.send_event(event = PromptToUserEvent(details).to_cloudevent())
+        logging.info(f"Antwort-Prompt an {params.user_email} an EventGrid gesendet.")
+        
     try:
         return func.HttpResponse(response_body, status_code=http_status, headers={"Content-Type": "text/plain; charset=utf-8"})
     except Exception as e:
