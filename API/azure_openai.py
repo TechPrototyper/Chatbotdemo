@@ -163,7 +163,7 @@ class InteractWithOpenAI:
             # Create prompt with user details
             time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             logging.info(f"Timestamp: {time_stamp}")
-            modified_prompt = f"Mein Name: {user_name}\nDatum und Uhrzeit: {time_stamp}\nStatus der Mitleseerlaubnis: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
+            modified_prompt = f"Mein Name: {user_name}\nMeine E-Mail Adresse: {user_email}\nDatum und Uhrzeit: {time_stamp}\nStatus der Mitleseerlaubnis: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
             logging.info(f"Modified Prompt: created.")
 
             if transscript_allowed == 1:
