@@ -157,14 +157,14 @@ class InteractWithOpenAI:
             thread_id = await self.get_or_create_thread(user_email)
             logging.info(f"Thread ID: {thread_id}")
 
+            u = UserThreads()
+            transscript_allowed = await u.get_extended_events(user_email)
+
             # Create prompt with user details
             time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             logging.info(f"Timestamp: {time_stamp}")
             modified_prompt = f"Mein Name: {user_name}\nDatum und Uhrzeit: {time_stamp}\nMitlesen erlaubt: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
             logging.info(f"Modified Prompt: created.")
-
-            u = UserThreads()
-            transscript_allowed = await u.get_extended_events(user_email)
 
             if transscript_allowed == 1:
                 details = {"email": user_email, "Name: ": user_name,"prompt": user_prompt}
