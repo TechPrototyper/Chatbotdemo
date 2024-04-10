@@ -212,7 +212,7 @@ class InteractWithOpenAI:
                         logging.error(f"Nachricht konnte nicht gesendet werden: {e}")
                         #TODO: Fehlerbehandlung anpassen
                         # return 500, f"*ISSUE* **{e}**"
-            logging.info(f"Message Object created, Prompt: {prompt}")
+            logging.info(f"Message Object created, Prompt: {modified_prompt}")
             # Eine Interaktion - sog. "Run" - erstellen
             run = await self.async_api_call(
                 lambda: self.client.beta.threads.runs.create(
