@@ -17,7 +17,6 @@ from opentelemetry import trace
 import logging
 from datetime import datetime
 from azure_openai import InteractWithOpenAI
-import aiohttp  
 
 
 # Initialisierung der Funktion App
@@ -71,20 +70,17 @@ def mock(req: func.HttpRequest) -> func.HttpResponse:
 # Hauptendpunkt für den Chat
 @app.route(route="chat", methods=["GET", "POST"])
 async def chat(req: func.HttpRequest) -> func.HttpResponse:
+    # Make this a nice Docstring here, please:
     """
-    Haupt-Chat-Endpoint, verbindet sich mit einem Backend-Service zur Verarbeitung der Anfragen.
+    Hauptendpunkt für den Chat mit OpenAI.
     """
+
+    
     # Parameter aus der Anfrage extrahieren.
     try:
       params = ChatRequestParams(req)
     except Exception as e:
       return func.HttpResponse(f"An error has occured: {e}", status_code=400)
-
-    # Timestamp für Prompt erstellen
-    time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Prompt für OpenAI erstellen
-    prompt = f"Mein Name: {params.user_name}\nDatum und Uhrzeit: {time_stamp}\nMein Prompt: {params.user_prompt}"
 
     # async with InteractWithOpenAI() as interaction:
     #     logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {prompt}")
@@ -93,15 +89,11 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
 
     interaction = InteractWithOpenAI()
     try:
-        logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {prompt}")
-        http_status, response = await interaction.chat(params.user_email, prompt)
+        logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {params.user_prompt}")
+        http_status, response_body = await interaction.chat(params.user_name, params.user_email, params.user_prompt)
         # logging.info(f"Chat-Endpoint came back: Response: {http_status}: {response}")
     finally:
         await interaction.close()
-
-    logging.info("InteractWithOpenAI() Context left, About to Return data to Caller!"  )
-
-    response_body = response[0].text.value
 
     try:
         return func.HttpResponse(response_body, status_code=http_status, headers={"Content-Type": "text/plain; charset=utf-8"})

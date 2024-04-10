@@ -22,10 +22,11 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import os
 import logging
-from my_cloudevents import UserRegisteredEvent
+from my_cloudevents import *
 from event_grid_publisher import EventGridPublisher
 from assistant_tools import AssistantTools
 import re
+from datetime import datetime
 
 
 # Konfiguration des Loggings
@@ -109,6 +110,12 @@ class InteractWithOpenAI:
         try:
             self.threads = UserThreads()
             thread_id = await self.threads.get_id(user_email)
+
+            #TODO: Zu viel Code Alarm, muss gestrafft werden: 3 Zeilen für einen Event sind zu viel.
+            user_details = {"email": user_email, "thread_id": thread_id}
+            async with EventGridPublisher() as publisher:
+                await publisher.send_event(event = UserLoginEvent(user_details).to_cloudevent())
+
         except LookupError:
             try:
                 # thread = self.client.beta.threads.create() 
@@ -117,7 +124,8 @@ class InteractWithOpenAI:
                 await self.threads.set_id(user_email, thread_id)
                 
                 #TODO: Weitere Properties des Benutzers speichern
-                #TODO: Async für Event Händling prüfen
+
+                #TODO: Zu viel Code Alarm, siehe oben.
                 user_details = {"email": user_email, "thread_id": thread_id}
                 
                 # Publish UserRegisteredEvent to EventGrid
@@ -133,7 +141,7 @@ class InteractWithOpenAI:
         
         return thread_id
 
-    async def chat(self, user_email: str, prompt: str):
+    async def chat(self, user_name: str, user_email: str, user_prompt: str):
         """
         Sendet den Prompt des Benutzers an den Azure-spezifischen Assistant und verarbeitet die Antwort.
 
@@ -145,17 +153,42 @@ class InteractWithOpenAI:
         """
 
         try:                
+            # Prüfen, ob der Benutzer Transskripte erlaubt
             thread_id = await self.get_or_create_thread(user_email)
             logging.info(f"Thread ID: {thread_id}")
+
+            u = UserThreads()
+            transscript_allowed = await u.get_extended_events(user_email)
+
+            # Create prompt with user details
+            time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logging.info(f"Timestamp: {time_stamp}")
+            modified_prompt = f"Mein Name: {user_name}\nMeine E-Mail Adresse: {user_email}\nDatum und Uhrzeit: {time_stamp}\nStatus der Mitleseerlaubnis: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
+            logging.info(f"Modified Prompt: created.")
+
+            if transscript_allowed == 1:
+                details = {"email": user_email, "Name: ": user_name,"prompt": user_prompt}
+                async with EventGridPublisher() as publisher:
+                    await publisher.send_event(event = PromptFromUserEvent(details).to_cloudevent())
+                    logging.info(f"Prompt von Benutzer {user_email} an EventGrid gesendet.")
+            
 
             while True:
             # Neue Nachricht erzeugen
                 try:
+                    logging.info(f"Message Object wird erstellt")
                     await self.async_api_call(lambda: self.client.beta.threads.messages.create(
                         thread_id=thread_id,
                         role="user",
-                        content=prompt
+                        content=modified_prompt
                     ))
+                    logging.info(f"Message Object ist ok.")
+
+                    if transscript_allowed == 1:
+                        details = {"email": user_email, "Name: ": user_name,"prompt": modified_prompt}
+                        async with EventGridPublisher() as publisher:
+                            await publisher.send_event(event = PromptToAIEvent(details).to_cloudevent())
+                            logging.info(f"Modifiziertes Prompt zum Backend an EventGrid gesendet.")
                     break
                 except Exception as e:
                     logging.info(f"Error: {e}")
@@ -182,7 +215,7 @@ class InteractWithOpenAI:
                         logging.error(f"Nachricht konnte nicht gesendet werden: {e}")
                         #TODO: Fehlerbehandlung anpassen
                         # return 500, f"*ISSUE* **{e}**"
-            logging.info(f"Message Object created, Prompt: {prompt}")
+            logging.info(f"Message Object created, Prompt: {modified_prompt}")
             # Eine Interaktion - sog. "Run" - erstellen
             run = await self.async_api_call(
                 lambda: self.client.beta.threads.runs.create(
@@ -216,9 +249,28 @@ class InteractWithOpenAI:
                             lambda: self.client.beta.threads.messages.list(thread_id=thread_id)
                         )
                         if messages.data and len(messages.data) > 0 and messages.data[0].content:
-                            return_prompt = messages.data[0].content                 
-                            logging.info(f"Response: {return_prompt}")
-                            return 200, return_prompt
+                            return_prompt = messages.data[0].content            
+                            response_body = return_prompt[0].text.value     
+                            logging.info(f"Response: {response_body}")
+
+                            if transscript_allowed == 1:
+                                details = {"email": user_email, "Name: ": user_name,"ai_prompt": response_body}
+                                async with EventGridPublisher() as publisher:
+                                    await publisher.send_event(event = PromptToUserEvent(details).to_cloudevent())
+                                    logging.info(f"Prompt von der AI für Benutzer {user_email} an EventGrid gesendet.")
+                                    
+                                # Diese Code ist zwar fast gleich; aber im Prinzip sind es zwei Events; einmal die
+                                # Message vom Backend an den Middletier, und einmal die Message vom Middletier
+                                # an das Frontend. Hier ist tatsächlich alles gleich, aber es kann sich evtl. später
+                                # später noch ändern. Es könnte z.B. auch sein, dass Magic Strings gefiltert werden müssen,
+                                # o.Ä.
+
+                                details = {"email": user_email, "Name: ": user_name,"prompt": response_body}
+                                async with EventGridPublisher() as publisher:
+                                    await publisher.send_event(event = PromptFromAIEvent(details).to_cloudevent())
+                                    logging.info(f"Prompt an der Frontend zum Benutzer {user_email} an EventGrid gesendet.")
+                                
+                            return 200, response_body
                         else:
                             return 200, "Da fällt mir im Moment gerade nichts zu ein (Leere Nachricht von der KI)."
                     case "cancelled": # Should never happen, we have no feature to support cancelling an interaction such as in ChatGPT
