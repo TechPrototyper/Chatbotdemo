@@ -166,8 +166,9 @@ class InteractWithOpenAI:
         # Create Prompt 
         # Timestamp für Prompt erstellen
         time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        modified_prompt = f"Mein Name: {user_name}\nDatum und Uhrzeit: {time_stamp}\nMitlesen erlaubt: {transscript_allowed}\nMein Prompt: {user_prompt}"
-
+        logging.info(f"Timestamp: {time_stamp}")
+        modified_prompt = f"Mein Name: {user_name}\nDatum und Uhrzeit: {time_stamp}\nMitlesen erlaubt: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
+        logging.info(f"Modified Prompt: created.")
         try:                
             thread_id = await self.get_or_create_thread(user_email)
             logging.info(f"Thread ID: {thread_id}")
@@ -175,16 +176,20 @@ class InteractWithOpenAI:
             while True:
             # Neue Nachricht erzeugen
                 try:
+                    logging.info(f"Message Object wird erstellt")
                     await self.async_api_call(lambda: self.client.beta.threads.messages.create(
                         thread_id=thread_id,
                         role="user",
                         content=modified_prompt
                     ))
+                    logging.info(f"Message Object ist ok.")
 
                     details = {"email": user_email, "Name: ": user_name,"prompt": modified_prompt}
                     async with EventGridPublisher() as publisher:
                         await publisher.send_event(event = PromptToAIEvent(details).to_cloudevent())
                         logging.info(f"Modifiziertes Prompt zum Backend an EventGrid gesendet.")
+                    
+                    logging.info("Prompt für Backend an EventGrid gesendet.")
 
                     break
                 except Exception as e:
