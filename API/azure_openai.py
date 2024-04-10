@@ -250,15 +250,16 @@ class InteractWithOpenAI:
                             lambda: self.client.beta.threads.messages.list(thread_id=thread_id)
                         )
                         if messages.data and len(messages.data) > 0 and messages.data[0].content:
-                            return_prompt = messages.data[0].content                 
-                            logging.info(f"Response: {return_prompt}")
+                            return_prompt = messages.data[0].content            
+                            response_body = return_prompt[0].text.value     
+                            logging.info(f"Response: {response_body}")
 
-                            details = {"email": user_email, "Name: ": user_name,"ai_prompt": return_prompt}
+                            details = {"email": user_email, "Name: ": user_name,"ai_prompt": response_body}
                             async with EventGridPublisher() as publisher:
                                 await publisher.send_event(event = PromptFromAIEvent(details).to_cloudevent())
                                 logging.info(f"Prompt von der AI für Benutzer {user_email} an EventGrid gesendet.")
-
-                            return 200, return_prompt
+                                                        
+                            return 200, response_body
                         else:
                             return 200, "Da fällt mir im Moment gerade nichts zu ein (Leere Nachricht von der KI)."
                     case "cancelled": # Should never happen, we have no feature to support cancelling an interaction such as in ChatGPT

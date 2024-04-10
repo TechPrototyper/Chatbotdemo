@@ -90,14 +90,12 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
     interaction = InteractWithOpenAI()
     try:
         logging.info(f"Chat-Endpoint: Calling... {params.user_email} mit Prompt: {params.user_prompt}")
-        http_status, response = await interaction.chat(params.user_name, params.user_email, params.user_prompt)
+        http_status, response_body = await interaction.chat(params.user_name, params.user_email, params.user_prompt)
         # logging.info(f"Chat-Endpoint came back: Response: {http_status}: {response}")
     finally:
         await interaction.close()
 
     logging.info("InteractWithOpenAI() Context left, About to Return data to Caller!"  )
-
-    response_body = response[0].text.value
 
     details = {"email": params.user_email, "Name: ": params.user_name, "prompt": response_body}
     async with EventGridPublisher() as publisher:
