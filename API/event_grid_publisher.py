@@ -2,6 +2,7 @@
 Titel:          event_grid_publisher.py
 Beschreibung:   Sendet Events ans Azure Event Grid.
                 Umstellung auf async an 04.04.2024.
+                Umstellung auf Factory-Pattern an 11.04.2024.
 Autor:          Tim Walter (TechPrototyper)
 Datum:          2024-04-11
 Version:        1.2.0
@@ -18,18 +19,11 @@ This keeps boiler plate code at a minimum and is very effective.
 from azure.eventgrid.aio import EventGridPublisherClient
 from azure.core.credentials import AzureKeyCredential
 import os
-# from typing import Optional
-import logging
-import asyncio
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-from azure.eventgrid.aio import EventGridPublisherClient
-from azure.core.credentials import AzureKeyCredential
-import os
 import asyncio
 import logging
 from my_cloudevents import BaseCloudEvent
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class EventGridPublisher:
     def __init__(self):

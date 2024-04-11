@@ -9,8 +9,8 @@ Beschreibung: Stellt die Kommunikation zwischen der Funktion App und der Azure O
               Auf die Verwendung der Hilfsmethode async_api_call() kann dann später verzichtet werden.
 
 Autor: Tim Walter (TechPrototyper)
-Datum: 2024-04-10
-Version: 1.0.1
+Datum: 2024-04-11
+Version: 1.1.0
 Quellen: [OpenAI API Dokumentation], [Azure Functions Dokumentation], [Azure Table Storage Dokumentation]
 Kontakt: projekte@tim-walter.net
 """
