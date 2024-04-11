@@ -37,6 +37,7 @@ class UserThreads:
             raise EnvironmentError("AZURE_STORAGE_CONNECTION_STRING Umgebungsvariable ist nicht gesetzt. Function App muss konfiguriert werden.")
         
         self.table_name = "UserThreads"
+        logging.info(f"UserThreads-Objekt erstellt.")
 
         # In der async-Variante haben wir keine dauerhaften Verbindungs-Objekte, sondern müssen die Connection per Request händeln:
         # self.table_service = TableServiceClient.from_connection_string(conn_str=self.connection_string)
@@ -54,6 +55,7 @@ class UserThreads:
             async with TableServiceClient.from_connection_string(self.connection_string) as table_service:
                 table_client = table_service.get_table_client(table_name=self.table_name)
                 user = await table_client.get_entity(partition_key="Chat", row_key=user_id)
+            logging.info(f"Thread für Benutzer gefunden, ID: {user['ThreadId']}")
             return user["ThreadId"]
         except Exception as e:
             logging.info(f"Thread für Benutzer {user_id} nicht gefunden.")
