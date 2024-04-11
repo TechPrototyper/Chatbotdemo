@@ -107,22 +107,30 @@ class InteractWithOpenAI:
         :type user_email: str
         :return: Die ID des Threads.
         """
+
+        logging.info(f"get_or_create_thread für {user_email} called.")
+
         try:
             self.threads = UserThreads()
+            logging.info(f"UserThreads-Objekt erstellt.")
             thread_id = await self.threads.get_id(user_email)
-
+            logging.info(f"Thread für Benutzer gefunden, ID: {thread_id}")
             #TODO: Zu viel Code Alarm, muss gestrafft werden: 3 Zeilen für einen Event sind zu viel.
             user_details = {"email": user_email, "thread_id": thread_id}
             async with EventGridPublisher() as publisher:
                 await publisher.send_event(event = UserLoginEvent(user_details).to_cloudevent())
+                logging.info(f"Benutzeranmeldung / UserLoginEvent an EventGrid gesendet.")
 
         except LookupError:
             try:
                 # thread = self.client.beta.threads.create() 
+                logging.info(f"Thread für Benutzer nicht gefunden, kein Eintrag in Datenbank.")
                 thread = await self.async_api_call(self.client.beta.threads.create)
                 thread_id = thread.id 
+                logging.info(f"Thread wurde erstellt, ID: {thread_id}")
                 await self.threads.set_id(user_email, thread_id)
-                
+
+                logging.info("Thread ID in Datenbank gespeichert.")
                 #TODO: Weitere Properties des Benutzers speichern
 
                 #TODO: Zu viel Code Alarm, siehe oben.
@@ -131,6 +139,7 @@ class InteractWithOpenAI:
                 # Publish UserRegisteredEvent to EventGrid
                 async with EventGridPublisher() as publisher:
                     await publisher.send_event(event = UserRegisteredEvent(user_details).to_cloudevent())
+                logging.info(f"Benutzerregistrierung / UserRegisteredEvent an EventGrid gesendet.")
 
             except Exception as e:
                 logging.error(f"Fehler bei der Thread-Erstellung oder -Speicherung: {e}")
