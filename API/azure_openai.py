@@ -125,17 +125,17 @@ class InteractWithOpenAI:
                 thread = await self.async_api_call(self.client.beta.threads.create)
                 thread_id = thread.id 
                 await self.threads.set_id(user_email, thread_id)
+                # After we're done, we'll let the world know that a user has registered...
+                user_details = {"email": user_email, "thread_id": thread_id}                
+                async with EventGridPublisher() as publisher:
+                    await publisher.send_event("user.registered", user_details)
+
             except Exception as e:
                 logging.error(f"Fehler bei der Thread-Erstellung oder -Speicherung: {e}")
                 raise
         except Exception as e:
             logging.error(f"Ein unbekannter Fehler beim Zugriff auf die Thread-Historie ist aufgetreten: {e}")
             raise
-
-        # After we're done, we'll let the world know that a user has registered...
-        user_details = {"email": user_email, "thread_id": thread_id}                
-        async with EventGridPublisher() as publisher:
-            await publisher.send_event("user.registered", user_details)
 
         # ... and return the Thread-Id for further processing
         return thread_id
