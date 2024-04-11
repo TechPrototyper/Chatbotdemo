@@ -36,8 +36,19 @@ Vor den Middletier bzw. die Web API wurde ein API Gateway (Azure API Management)
 
 ### Events: New User Registered Event im Azure Event Grid
 
-Der Chatbot enthält serverseitig ein Eventgrid-Topic, auf dem zur Zeit für den Fall eines Erstlogins ein Ereignis ausgelöst wird. Mit Hilfe einer Eventgrid Subscription kann dann auf dieses Ereignis reagiert werden. Es ist sind weitere Events geplant, aber die Infrastruktur steht. Es muss dazu natürlich ein Eventgrid-Topic angelegt werden, und zwei weitere Environment-Parameter gesetzt werden, damit die Chat API Events veröffentlichen kann. Zur Behandlung wurde eine Familie von Klassen erstellt, die die Nachrichten nach dem Cloud Event Schenma 1.0 generieren, *my_cloudevents.py*, und ein Modul, welches diese Event-Messages an das Event-Grid übermittelt, *event_grid_publisher.py*.
+Der Chatbot enthält serverseitig ein Eventgrid-Topic, auf dem verschiedene Ereignisse ausgelöst werden, z.B. die Registrierung eines neues Benutzers, das Login, oder Chat-Events. Mit Hilfe einer Eventgrid Subscription kann dann auf dieses Ereignis reagiert werden, wie z.B. hier mit einer Logic App auf den Erstlogin eines Benutzers:
 
+<img width="1536" alt="Screenshot 2024-04-11 at 10 25 53" src="https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/2577b557-aca7-4df6-b06e-e8813bb9bdd3">
+
+Die Events laufen über ein Eventgrid-Topic, das zwei weitere Environment-Parameter benötigt, damit die Chat API Events veröffentlichen kann. Zur Behandlung wurde eine Familie von Klassen erstellt, die die Nachrichten nach dem Cloud Event Schenma 1.0 generieren, *my_cloudevents.py*, und ein Modul, welches diese Event-Messages an das Event-Grid übermittelt, *event_grid_publisher.py*.
+
+Hier ein Überblick über die Azure Resource-Gruppe "Chatbot_RG", die insgesamt alle angelegten Azure-Artefakte im Überblick zeigt:
+
+<img width="1300" alt="Screenshot 2024-04-11 at 10 16 41" src="https://github.com/TechPrototyper/Chatbotdemo/assets/110817746/0cb85155-88c0-493c-a1ba-31776a069418">
+
+### Abschließende Würdigung der Entwicklungsumgebung Azure / Python / Azure OpenAI / OpenAI Assistant API & Python Bibliothek
+
+Es gibt unterdessen so viele Ansätze, Tools, APIs und Bibliotheken, und die Landschaft verändert sich schnell. Ob für einen gegebenen Anwendungsfall die Assistant API die beste Option ist, hängt von verschiedenen Fragen ab. Die neue Assistant API ist in jedem Fall eine leistungsstarke Option mit großer Flexibilität. Natürlich sind z.B. Funktionsaufrufe auch über Magic Strings modellierbar, und Dialogpersistenz z.B. über LangChain oder das Bot Framework SDK von Microsoft. Den richtigen Ansatz zu finden wird sicherlich Teil einer möglichen Projektleistung sein.
 
 ### Runtime und Repo-Variablen
 
