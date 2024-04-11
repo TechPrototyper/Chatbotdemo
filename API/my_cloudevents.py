@@ -2,15 +2,14 @@
 Titel: my_cloudevents.py
 Beschreibung:   Implementiert eine Basisklasse für CloudEvents, die in Azure verwendet werden können.
 Autor: Tim Walter (TechPrototyper)
-Datum: 2024-04-04
-Version: 1.0.0
+Datum: 2024-04-11
+Version: 1.1.0
 Quellen: [Azure Event Grid], [CloudEvents Spezifikation]
 Kontakt: projekte@tim-walter.net
 """
 
 """
-Vorläufiges Design; zu viel Boilerplate Code, aber so sehr flexibel.
-
+Version 1.1: Umstellung auf Factory Methoden
 """
 
 from datetime import datetime, timezone
@@ -54,92 +53,35 @@ class BaseCloudEvent:
         }
         return CloudEvent(attributes, self.data)
 
+    @classmethod
+    def create_user_registered_event(cls, user_details: dict):
+        return cls("", "user.registered", user_details).to_cloudevent()
 
-class UserRegisteredEvent(BaseCloudEvent):
-    def __init__(self, user_details: dict) -> None:
+    @classmethod
+    def create_user_login_event(cls, user_details: dict):
+        return cls("", "user.login", user_details).to_cloudevent()
 
-        type = "user.registered"
+    @classmethod
+    def create_prompt_from_user_event(cls, prompt_details: dict):
+        return cls("", "user.prompt", prompt_details).to_cloudevent()
 
-        super().__init__(
-            source="",
-            type=type,
-            data=user_details
-        )
+    @classmethod
+    def create_prompt_to_user_event(cls, prompt_details: dict):
+        return cls("", "user.response", prompt_details).to_cloudevent()
 
-class UserLoginEvent(BaseCloudEvent):
-    def __init__(self, user_details: dict) -> None:
-        
-        type="user.login"
-        
-        super().__init__(
-            source="",
-            type=type,
-            data=user_details
-        )
+    @classmethod
+    def create_prompt_to_ai_event(cls, prompt_details: dict):
+        return cls("", "backend.prompt", prompt_details).to_cloudevent()
 
-class PromptFromUserEvent(BaseCloudEvent):
-    def __init__(self, prompt_details: dict) -> None:
-        
-        type="user.prompt"
-        
-        super().__init__(
-            source="",
-            type=type,
-            data=prompt_details
-        )
+    @classmethod
+    def create_prompt_from_ai_event(cls, prompt_details: dict):
+        return cls("", "backend.response", prompt_details).to_cloudevent()
 
-class PromptToUserEvent(BaseCloudEvent):
-    def __init__(self, prompt_details: dict) -> None:
-        
-        type="user.response"
-        
-        super().__init__(
-            source="",
-            type=type,
-            data=prompt_details
-        )
+    @classmethod
+    def create_chat_ended_event(cls, chat_summary_details: dict):
+        return cls("", "user.chatended", chat_summary_details).to_cloudevent()
 
-class PromptToAIEvent(BaseCloudEvent):
-    def __init__(self, prompt_details: dict) -> None:
-        
-        type="backend.prompt"
-        
-        super().__init__(
-            source="",
-            type=type,
-            data=prompt_details
-        )
-
-class PromptFromAIEvent(BaseCloudEvent):
-    def __init__(self, prompt_details: dict) -> None:
-        
-        type="backend.response"
-        
-        super().__init__(
-            source="",
-            type=type,
-            data=prompt_details
-        )
-
-class ChatEndedEvent(BaseCloudEvent):
-    def __init__(self, chat_summary_details: dict) -> None:
-        
-        type="user.chatended"
-        
-        super().__init__(
-            source="",
-            type=type,
-            data=chat_summary_details
-        )
-
-class ErrorEvent(BaseCloudEvent):
-    def __init__(self, error_details: dict) -> None:
-        
-        type="system.error"
-        
-        super().__init__(
-            source="",
-            type=type,
-            data=error_details
-        )
+    @classmethod
+    def create_error_event(cls, error_details: dict):
+        return cls("", "system.error", error_details).to_cloudevent()
 

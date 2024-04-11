@@ -15,7 +15,6 @@ Quellen: [OpenAI API Dokumentation], [Azure Functions Dokumentation], [Azure Tab
 Kontakt: projekte@tim-walter.net
 """
 
-
 from openai import AzureOpenAI  # Angenommen, dies ist der korrekte Importpfad
 from user_threads import UserThreads
 # from typing import Tuple
@@ -23,20 +22,21 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import os
 import logging
-from my_cloudevents import *
 from event_grid_publisher import EventGridPublisher
 from assistant_tools import AssistantTools
 import re
 from datetime import datetime
 
 
-# Konfiguration des Loggings
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 class InteractWithOpenAI:
     """
     Diese Klasse handhabt die Kommunikation mit der Azure OpenAI API.
     Sie verwendet die Azure OpenAI API, um Benutzeranfragen zu verarbeiten und Antworten zu generieren.
+
     """
 
     async def async_api_call(self, method, *args, **kwargs):
@@ -109,46 +109,35 @@ class InteractWithOpenAI:
         :return: Die ID des Threads.
         """
 
-        logging.info(f"get_or_create_thread für {user_email} called.")
-
         try:
             self.threads = UserThreads()
-            logging.info(f"UserThreads-Objekt erstellt.")
             thread_id = await self.threads.get_id(user_email)
-            logging.info(f"Thread für Benutzer gefunden, ID: {thread_id}")
-            #TODO: Zu viel Code Alarm, muss gestrafft werden: 3 Zeilen für einen Event sind zu viel.
-            user_details = {"email": user_email, "thread_id": thread_id}
-            async with EventGridPublisher() as publisher:
-                await publisher.send_event(event = UserLoginEvent(user_details).to_cloudevent())
-                logging.info(f"Benutzeranmeldung / UserLoginEvent an EventGrid gesendet.")
 
-        except LookupError:
+            user_details = {"email": user_email, "thread_id": thread_id}
+
+            # That's not precisely right, because we'not only coming here on login,
+            # but in fact on every prompt. Hence, we should not send this event here:
+            # async with EventGridPublisher() as publisher:
+            #     await publisher.send_event("user.login", user_details)
+
+        except LookupError: # No known conversation for this user as of now
             try:
-                # thread = self.client.beta.threads.create() 
-                logging.info(f"Thread für Benutzer nicht gefunden, kein Eintrag in Datenbank.")
                 thread = await self.async_api_call(self.client.beta.threads.create)
                 thread_id = thread.id 
-                logging.info(f"Thread wurde erstellt, ID: {thread_id}")
                 await self.threads.set_id(user_email, thread_id)
-
-                logging.info("Thread ID in Datenbank gespeichert.")
-                #TODO: Weitere Properties des Benutzers speichern
-
-                #TODO: Zu viel Code Alarm, siehe oben.
-                user_details = {"email": user_email, "thread_id": thread_id}
-                
-                # Publish UserRegisteredEvent to EventGrid
-                async with EventGridPublisher() as publisher:
-                    await publisher.send_event(event = UserRegisteredEvent(user_details).to_cloudevent())
-                logging.info(f"Benutzerregistrierung / UserRegisteredEvent an EventGrid gesendet.")
-
             except Exception as e:
                 logging.error(f"Fehler bei der Thread-Erstellung oder -Speicherung: {e}")
                 raise
         except Exception as e:
-            logging.error(f"Fehler beim Zugriff auf die Thread-Historie: {e}")
+            logging.error(f"Ein unbekannter Fehler beim Zugriff auf die Thread-Historie ist aufgetreten: {e}")
             raise
-        
+
+        # After we're done, we'll let the world know that a user has registered...
+        user_details = {"email": user_email, "thread_id": thread_id}                
+        async with EventGridPublisher() as publisher:
+            await publisher.send_event("user.registered", user_details)
+
+        # ... and return the Thread-Id for further processing
         return thread_id
 
     async def chat(self, user_name: str, user_email: str, user_prompt: str):
@@ -163,70 +152,110 @@ class InteractWithOpenAI:
         """
 
         try:                
-            # Prüfen, ob der Benutzer Transskripte erlaubt
+            # Did we chat already? If so, let's continue, if not, let's start:
             thread_id = await self.get_or_create_thread(user_email)
-            logging.info(f"Thread ID: {thread_id}")
 
-            u = UserThreads()
-            transscript_allowed = await u.get_extended_events(user_email)
+            # Is the user ok with us reading the conversation?
+            transscript_allowed = await self.check_transscript_permission(user_email)
 
-            # Create prompt with user details
-            time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            logging.info(f"Timestamp: {time_stamp}")
-            modified_prompt = f"Mein Name: {user_name}\nMeine E-Mail Adresse: {user_email}\nDatum und Uhrzeit: {time_stamp}\nStatus der Mitleseerlaubnis: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
-            logging.info(f"Modified Prompt: created.")
-
+            # GDPR: Are we allowed to read the conversation?
+            # If so, we will send the prompt typed in to the EventGrid to whom it may concern
             if transscript_allowed == 1:
                 details = {"email": user_email, "Name: ": user_name,"prompt": user_prompt}
                 async with EventGridPublisher() as publisher:
-                    await publisher.send_event(event = PromptFromUserEvent(details).to_cloudevent())
-                    logging.info(f"Prompt von Benutzer {user_email} an EventGrid gesendet.")
-            
+                    await publisher.send_event("prompt.from.user", details)            
 
-            while True:
-            # Neue Nachricht erzeugen
-                try:
-                    logging.info(f"Message Object wird erstellt")
-                    await self.async_api_call(lambda: self.client.beta.threads.messages.create(
-                        thread_id=thread_id,
-                        role="user",
-                        content=modified_prompt
-                    ))
-                    logging.info(f"Message Object ist ok.")
+            # Let's embed the user's input into some information block for the LLM:
+            modified_prompt = await self.create_modified_prompt(user_name, user_email, user_prompt, transscript_allowed)        
 
-                    if transscript_allowed == 1:
-                        details = {"email": user_email, "Name: ": user_name,"prompt": modified_prompt}
-                        async with EventGridPublisher() as publisher:
-                            await publisher.send_event(event = PromptToAIEvent(details).to_cloudevent())
-                            logging.info(f"Modifiziertes Prompt zum Backend an EventGrid gesendet.")
-                    break
-                except Exception as e:
-                    logging.info(f"Error: {e}")
-                    # Konvertiert die Exception zu einem String, um sie mit Regex zu verarbeiten
-                    error_str = str(e)
-                    if "Can't add messages to" in error_str and "while a run" in error_str and "is active." in error_str:
-                        # Extrahiert die thread_id und run_id aus der Fehlermeldung mit Regex
-                        thread_id_match = re.search(r"thread_([a-zA-Z0-9]+)", error_str)
-                        run_id_match = re.search(r"run_([a-zA-Z0-9]+)", error_str)
-                        
-                        if thread_id_match and run_id_match:
-                            thread_id = "thread_"+thread_id_match.group(1)
-                            run_id = "run_"+run_id_match.group(1)
-                            logging.info(f"Thread ID: {thread_id}, Run ID: {run_id}")
-                            # self.client.beta.threads.runs.cancel(run_id = run_id, thread_id = thread_id)
-                            await self.async_api_call(
-                                lambda: self.client.beta.threads.runs.cancel(run_id=run_id, thread_id=thread_id)
-                            )
+            # Prepare the message to be sent to the Azure OpenAI API
+            await self.prepare_message(thread_id, user_name, user_email, modified_prompt)
 
-                            logging.info(f"Lfd. Run für Thread {thread_id} abgebrochen.")
-                        else:
-                            logging.error("Thread ID oder Run ID konnte nicht aus der Fehlermeldung extrahiert werden.")
+            if transscript_allowed == 1: # If we're allowed...
+                details = {"email": user_email, "Name: ": user_name,"prompt": modified_prompt}
+                async with EventGridPublisher() as publisher: # we let the world know that we've sent the prompt to the AI
+                    await publisher.send_event("prompt.to.ai", details)   
+
+            # We've added a message to the thread, and now we'll order the LLM to work on the dialog by starting a run
+            # We may have to do things in between such as executing local functions etc.
+            http_status, response_body = await self.create_and_monitor_run(thread_id, user_name, user_email, transscript_allowed)
+
+            # And return hopefully something that makes sense to the user
+            return http_status, response_body
+
+        except Exception as e: # Outer try, just for safety reasons
+            logging.error(f"Chat-Error: {e}")
+            return 509, f"*ISSUE* **{e}**"
+    
+    async def update_run(self, tool_outputs, thread_id, run_id):
+        # Sendet die verarbeiteten Tool-Ausgaben zurück an die OpenAI-API
+        run = await self.async_api_call(
+            lambda: self.client.beta.threads.runs.submit_tool_outputs(
+                thread_id=thread_id,
+                run_id=run_id,
+                tool_outputs=tool_outputs
+            )
+        )
+        return run
+    
+    async def check_transscript_permission(self, user_email: str) -> bool:
+        u = UserThreads()
+        transscript_allowed = await u.get_extended_events(user_email)
+        logging.info(f"Transscript allowance checked for {user_email}: Value is {str(transscript_allowed)}")
+        return transscript_allowed
+    
+    async def create_modified_prompt(self, user_name: str, user_email: str, user_prompt: str, transscript_allowed: int) -> str:
+        time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        modified_prompt = f"Mein Name: {user_name}\nMeine E-Mail Adresse: {user_email}\nDatum und Uhrzeit: {time_stamp}\nStatus der Mitleseerlaubnis: {str(transscript_allowed)}\nMein Prompt: {user_prompt}"
+        logging.info(f"Modified prompt created: {modified_prompt}")
+        return modified_prompt
+    
+    async def prepare_message(self, thread_id: str, user_name: str, user_email: str, modified_prompt: str):
+
+        while True: # We have to loop because we may find the thread being in a run;
+                    # in this case we have to cancel it first and then go again
+            try:
+                await self.async_api_call(lambda: self.client.beta.threads.messages.create(
+                    thread_id=thread_id,
+                    role="user",
+                    content=modified_prompt
+                ))
+                logging.info(f"Prepare Message: Object created successfully.")
+                break
+            except Exception as e: # Message could not be created/sent, let's check the run status
+                logging.info(f"Prepare Message Error: {e}")
+                
+                # If the message is rejected because the thread has an active run,
+                # the error message from OpenAI will contain the thread_id and run_id - we can extract them:
+                error_str = str(e) # From a string
+                if "Can't add messages to" in error_str and "while a run" in error_str and "is active." in error_str:
+                    # I love regex... 
+                    thread_id_match = re.search(r"thread_([a-zA-Z0-9]+)", error_str)
+                    run_id_match = re.search(r"run_([a-zA-Z0-9]+)", error_str)
+                    
+                    if thread_id_match and run_id_match: # And indeed, we found'em:
+                        thread_id = "thread_"+thread_id_match.group(1)
+                        run_id = "run_"+run_id_match.group(1)
+                        logging.info(f"Prepare message: Error reports Thread ID: {thread_id}, Run ID: {run_id}")
+
+                        # Let's cancel the run and try again
+
+                        await self.async_api_call(
+                            lambda: self.client.beta.threads.runs.cancel(run_id=run_id, thread_id=thread_id)
+                        )
+
+                        logging.info(f"Prepare Message: Run {run_id} cancelled.")
+
                     else:
-                        logging.error(f"Nachricht konnte nicht gesendet werden: {e}")
-                        #TODO: Fehlerbehandlung anpassen
-                        # return 500, f"*ISSUE* **{e}**"
-            logging.info(f"Message Object created, Prompt: {modified_prompt}")
-            # Eine Interaktion - sog. "Run" - erstellen
+                        logging.info("Prepare message: Unknown error, no Id's could be extracted.")
+                else:
+                    logging.error(f"Prepare Message: Unknown error: {e}")
+                    #TODO: Fehlerbehandlung anpassen
+                    # return 500, f"*ISSUE* **{e}**"
+
+    async def create_and_monitor_run(self, thread_id: str, user_name: str, user_email: str, transscript_allowed: int) -> str:
+
+            # We've added a message to the thread, and now we'll order the LLM to work on the dialog by starting a run
             run = await self.async_api_call(
                 lambda: self.client.beta.threads.runs.create(
                     thread_id=thread_id,
@@ -234,8 +263,8 @@ class InteractWithOpenAI:
                 )
             )
 
-
             logging.info(f"Run created, Run ID: {run.id}")
+
 
             while True:
                 # Wait for run to return with a status
@@ -252,38 +281,45 @@ class InteractWithOpenAI:
                     await asyncio.sleep(1)
 
                 
-                match updated_run.status:
-                    case "completed": # Wir haben eine Antwort, ab zum Benutzer damit!
-                        # messages = self.client.beta.threads.messages.list(thread_id=thread_id)
+                match updated_run.status: # Let's see where we got with the run so far...
+                    case "completed": # We got a reply for the user from the LLM - this is what we want.
+                        # So let's get it out of the thread ...
                         messages = await self.async_api_call(
                             lambda: self.client.beta.threads.messages.list(thread_id=thread_id)
                         )
+                        # Well, a message should be longer then zero and contain something, right?
                         if messages.data and len(messages.data) > 0 and messages.data[0].content:
-                            return_prompt = messages.data[0].content            
+                            # Yeah, we got something, let's get it out of the JSON structure
+                            return_prompt = messages.data[0].content
+                            # And extract the text value from the JSON            
                             response_body = return_prompt[0].text.value     
                             logging.info(f"Response: {response_body}")
 
+                            # If we're allowed to read the conversation, we'll send the response from the LLM to the EventGrid
                             if transscript_allowed == 1:
+                                details = {"email": user_email, "Name: ": user_name,"prompt": response_body}                                
+                                async with EventGridPublisher() as publisher:
+                                    await publisher.send_event("prompt.from.ai", details)            
+
+                                # Don't be surprised we're doing the same thing twice;
+                                # This is due to envisioned future changes
+                                # We may have to unwind magic strings here, or check for some trigger
+                                # words, or whatever.
+                                # In the future, the response from the AI may well be different to what we're
+                                # sending to the user. Of course that is not the case right now, so it may look
+                                # a bit redundant. But it's not :-)
+
                                 details = {"email": user_email, "Name: ": user_name,"ai_prompt": response_body}
                                 async with EventGridPublisher() as publisher:
-                                    await publisher.send_event(event = PromptToUserEvent(details).to_cloudevent())
-                                    logging.info(f"Prompt von der AI für Benutzer {user_email} an EventGrid gesendet.")
-                                    
-                                # Diese Code ist zwar fast gleich; aber im Prinzip sind es zwei Events; einmal die
-                                # Message vom Backend an den Middletier, und einmal die Message vom Middletier
-                                # an das Frontend. Hier ist tatsächlich alles gleich, aber es kann sich evtl. später
-                                # später noch ändern. Es könnte z.B. auch sein, dass Magic Strings gefiltert werden müssen,
-                                # o.Ä.
-
-                                details = {"email": user_email, "Name: ": user_name,"prompt": response_body}
-                                async with EventGridPublisher() as publisher:
-                                    await publisher.send_event(event = PromptFromAIEvent(details).to_cloudevent())
-                                    logging.info(f"Prompt an der Frontend zum Benutzer {user_email} an EventGrid gesendet.")
-                                
+                                    await publisher.send_event("prompt.to.user", details)            
+                            
+                            # Off we go:
                             return 200, response_body
                         else:
+                            # Well, we got a message, but it's empty. That's bizarre. Wonder if that ever happens.
                             return 200, "Da fällt mir im Moment gerade nichts zu ein (Leere Nachricht von der KI)."
                     case "cancelled": # Should never happen, we have no feature to support cancelling an interaction such as in ChatGPT
+                        # Watch the magic string here that tells the Frontend to finish the chat
                         return 200, "Chat abgebrochen. /(ENDE)\\"
                     case "cancelling": # Same here, although, if for any reason this is happening, we will actually wait until the state changes to "cancelled"
                         pass
@@ -292,30 +328,18 @@ class InteractWithOpenAI:
                     case "expired":
                         return 200, "Ich bin scheinbar im Moment nicht in der Lage, eine Antwort zu formulieren. Ich bitte um Entschuldigung. Evtl. versuchen Sie es später nochmals. /(ENDE)\\"
                     case "failed":
-                        return 200, "Oh, auch die Künstliche Intelligenz kann Fehler machen. Ihre Anfrage konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut."
-                    case "requires_action": # Aufruf lokaler Funktionen etc.
-                        logging.info("Run requires action:")
+                        return 200, "Oh, auch künstliche Intelligenz ist nicht unfehlbar, so wie Gott. Ihre Anfrage konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut."
+                    case "requires_action": # The AI wants to act autonomously, let's let it do so_
+                        logging.info("In Run: Action required.")
+                        # This nice function here will execute all known local functions simultaneously
+                        # wait for all functions to finish, and settle the results; once we got'em, we'll
+                        # be reporting them back to the LLM:
                         results = await self.assistant_tools.execute_tool_calls(updated_run)
-                        logging.debug(f"Results of function calls: {results}")
+                        logging.debug(f"In Run: Results from local function calls: {results}")
                         if results:
                             updated_run = await self.update_run(results, thread_id, updated_run.id)
+
                     case _: # Unknown state, let's break out here
                         logging.error(f"Problem beim Durchführen des Runs: {updated_run.status}")
                         return 500, f"*ISSUE* **Run Status: {updated_run.status}**"
-                #time.sleep(1)
-                pass # we'll check if after the actions are done the state changes
-
-        except Exception as e: # Äußerer Try, um alle Fehler zu fangen
-            logging.error(f"Chat-Error: {e}: {updated_run}")
-            return 509, f"*ISSUE* **{e}**"
-    
-    async def update_run(self, tool_outputs, thread_id, run_id):
-        # Sendet die verarbeiteten Tool-Ausgaben zurück an die OpenAI-API
-        run = await self.async_api_call(
-            lambda: self.client.beta.threads.runs.submit_tool_outputs(
-                thread_id=thread_id,
-                run_id=run_id,
-                tool_outputs=tool_outputs
-            )
-        )
-        return run
+                    
